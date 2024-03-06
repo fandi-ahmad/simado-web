@@ -1,0 +1,10 @@
+@font-face {
+  font-family: 'nucleo'; /* Ganti dengan nama font yang ingin Anda gunakan */
+  src: url('../fonts/nucleo.ttf') format('truetype'); /* Ganti dengan path menuju file TTF */
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  font-family: 'nucleo', sans-serif; /* Gunakan nama font yang Anda tentukan di atas */
+}
