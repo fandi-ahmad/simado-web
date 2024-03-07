@@ -1,6 +1,6 @@
 import { React, useEffect, useState } from 'react'
 import logoCt from '../assets/img/logo-ct.png'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useGlobalState } from '../state/state'
 import { CreateCategory, DeleteCategory, GetAllCategory, UpdateCategory } from '../api/category'
 import { getId } from '../function/baseFunction'
@@ -38,6 +38,7 @@ const Sidebar = () => {
   const [textInfo, setTextInfo] = useState('Buat kategori baru')
   const [textAlert, setTextAlert] = useState('')
   const navigate = useNavigate()
+  const params = useParams()
 
 
   const getAllData = async () => {
@@ -147,7 +148,6 @@ const Sidebar = () => {
 
             {listMenu('fa-house', 'Dashboard', '/')}
             {listMenu('fa-file', 'Semua Dokumen', '/document')}
-            {listMenu('fa-table', 'Kategori', '/category')}
             {listMenu('fa-users', 'Pengguna', '/user')}
 
             <li className="w-full mt-4">
@@ -160,13 +160,13 @@ const Sidebar = () => {
               {dataCategory.map((data) => (
                 <div key={data.id} className='dropdown w-full'>
 
-                  <div className='hover:text-gray-700 hover:font-semibold flex justify-between items-center hovered'>
+                  <div className={params.id == data.id ? 'text-gray-700 font-semibold flex justify-between items-center hovered' : 'hover:text-gray-700 hover:font-semibold flex justify-between items-center hovered'}>
                     <div onClick={() => navigate('/document/'+data.id)} className='py-1 w-full'>
                       <i className="fa-solid fa-caret-right"></i>
                       <span className='pl-4'>{data.name}</span>
                     </div>
                     <span tabIndex={0} role='button' className='px-3 hover:bg-gray-200 rounded-full transition-all duration-100'>
-                      <i className="fa-solid fa-ellipsis-vertical"></i>
+                      <i className="fa-solid fa-ellipsis-vertical fa-vertical"></i>
                     </span>
                   </div>
 

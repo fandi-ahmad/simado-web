@@ -10,7 +10,7 @@ const headers = () => {
 }
 
 export const callApi = (method, url, data = null) => {
-  return axios[method](apiUrl+url, data, {
+  return axios[method](apiUrl+'/api/v1'+url, data, {
     withCredentials: true,
   }, headers())
   .then(response => response.data)

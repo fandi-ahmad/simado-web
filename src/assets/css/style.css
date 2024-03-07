@@ -9,11 +9,11 @@
   font-family: 'nucleo', sans-serif; /* Gunakan nama font yang Anda tentukan di atas */
 }
 
-.fa-ellipsis-vertical {
+.fa-vertical {
   display: none;
 }
 
-.hovered:hover .fa-ellipsis-vertical {
+.hovered:hover .fa-vertical {
   display: inline-block;
 }
 

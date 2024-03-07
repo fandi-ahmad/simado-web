@@ -12,9 +12,11 @@ const Navbar = (props) => {
             <li className="text-sm leading-normal">
               <a className="opacity-50 text-slate-700">Pages</a>
             </li>
-            <li className="text-sm pl-2 capitalize leading-normal text-slate-700 before:float-left before:pr-2 before:text-gray-600 before:content-['/']" aria-current="page">{props.page}</li>
+            <li className="text-sm pl-2 capitalize leading-normal text-slate-700 before:float-left before:pr-2 before:text-gray-600 before:content-['/']" aria-current="page">
+              {props.page}
+            </li>
           </ol>
-          <h6 className="mb-0 font-bold capitalize">{props.page}</h6>
+          <h6 className="mb-0 font-bold capitalize">{props.pageTitle || props.page}</h6>
         </nav>
 
         <div onClick={() => setAsideClass(asideClass === 'shadow-soft-xl' ? 'translate-x-0' : 'shadow-soft-xl')} className="cursor-pointer flex items-center mt-2 grow sm:mt-0 sm:mr-6 md:mr-0 lg:flex lg:basis-auto w-fit">

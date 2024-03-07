@@ -23,7 +23,7 @@ export const BaseTable = (props) => {
           <h6>{props.name}</h6>
         </div>
         <div className="flex-auto px-0 pt-0 pb-2">
-          <div className="p-0 overflow-x-auto">
+          <div className="p-0 ">
             <table className="items-center w-full mb-0 align-top text-slate-500">
               <thead className="align-bottom">
                 <tr>

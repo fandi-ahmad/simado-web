@@ -28,9 +28,9 @@ export const InputColumn = (props) => {
 
 export const SelectInput = (props) => {
   return (
-    <div className='flex justify-between mb-2'>
+    <div className='mb-2'>
       <p className="pt-4 mb-2">{props.text}</p>
-      <select id={props.id} onChange={props.onChange} name={props.name} className={`${props.classInput || ''} select select-bordered w-96`}>
+      <select id={props.id} onChange={props.onChange} name={props.name} className={`${props.classInput || ''} select select-bordered w-full`}>
         <option>-</option>
         {props.option}
       </select>
