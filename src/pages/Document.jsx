@@ -1,23 +1,33 @@
 import { React, useEffect, useRef, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import { BaseTable, TableHead, TableData } from '../components/BaseTable'
 import { Main, Container, ContainerRow } from '../components/BaseLayout'
-import { GetAllFile, CreateFile, DeleteFile, UpdateFile } from '../api/file'
-import { GetAllCategory } from '../api/category'
-import { downloadFile, getId } from '../function/baseFunction'
+import { GetAllFile, CreateFile, DeleteFile, UpdateFile, GetAllFileByCategory } from '../api/file'
+import { downloadFile, getId, limitText } from '../function/baseFunction'
 import { ModalAlert, ModalForm } from '../components/BaseModal'
-import { BaseInput, SelectInput } from '../components/BaseInput'
+import { InputColumn } from '../components/BaseInput'
 import { ContainerWhiteCard } from '../components/BaseCard'
+import { BadgeFormatFile } from '../components/Badge'
 
 
 const Document = () => {
   const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const [data, setData] = useState([])
   const [dataCategory, setDataCategory] = useState([])
-  const [uuid, setUuid] = useState('')
-  const [textInfo, setTextInfo] = useState('tambah')
+  const [id, setId] = useState('')
+  const [textInfo, setTextInfo] = useState('')
   const [textAlert, setTextAlert] = useState('')
+  const [textFileInput, setTextFileInput] = useState('upload file')
+  const [isRequired, setIsRequired] = useState(false)
+  const [fileUpload, setFileUpload] = useState('')
+  const [fileName, setFileName] = useState('')
+  const [number, setNumber] = useState('')
+  const [source, setSource] = useState('')
+  const [format, setFormat] = useState('')
+  const [idCategory, setIdCategory] = useState('')
+
   const meta = useRef({
     id: '',
     file_name: '',
@@ -27,102 +37,119 @@ const Document = () => {
     year: '',
     format: '',
     id_category: '',
-    id_user: 'acf821a5-1f1a-4869-a3b9-6e7ab5cf176b'
+    id_user: 'acf821a5-1f1a-4869-a3b9-6e7ab5cf176b' //temporary
   })
   const [imgSrc, setImgSrc] = useState('')
+  const params = useParams()
+  const navigate = useNavigate()
+
 
   const getAllData = async () => {
     try {
-      const result = await GetAllFile()
-      setData(result.data)
-    } catch (error) {
-      
-    }
+      const result = params.id ? await GetAllFileByCategory(params.id) : await GetAllFile();
+      if (result.data) setData(result.data);
+      if (result.status == 404) navigate('/document')
+      if (params.id) setIdCategory(params.id)
+    } catch (error) {}
   }
 
-  const openModal = (dataParams = '') => {
-    setUuid(dataParams.id)
+  const cleanUpFormInput = () => {
+    setFileUpload('')
+    setFileName('')
+    setNumber('')
+    setSource('')
+    setFormat('')
+    getId('fileUpload').value = ''
+    getId('fileUploadError').classList.add('hidden')
+    getId('fileNameError').classList.add('hidden')
+  }
 
-    console.log(dataParams, '<-- data params');
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case 'file_name': setFileName(value); break;
+      case 'source': setSource(value); break;
+      case 'number': setNumber(value); break;
+      default: break;
+    }
+  };
+
+  const handleInputFile = (e) => {
+    const imageSelect = e.target.files[0]
+    setFileUpload(imageSelect)
+
+    let fileName = imageSelect.name.split('.')
+    let firstPart = fileName[0]
+    let fileFormat = fileName.pop();
+
+    setFileName(firstPart)
+    setFormat(fileFormat)
+  };
+
+
+  const openModal = (dataParams = '') => {
+    setId(dataParams.id)
 
     if (dataParams.id) {
-      setTextInfo('perbarui')
+      // for edit
+      setTextInfo('edit file')
+      setTextFileInput('upload file baru')
+      setIsRequired(false)
       getId('btnCreate').classList.add('hidden')
       getId('btnUpdate').classList.remove('hidden')
 
-      meta.current.id = dataParams.id
-      meta.current.file_name = dataParams.file_name
-      meta.current.id_category = dataParams.id_category
-      meta.current.format = dataParams.format
-      meta.current.number = dataParams.number
-      meta.current.source = dataParams.source
-      meta.current.year = dataParams.year
-
-      getId('file_name').value = dataParams.file_name
-      getId('category').value = dataParams.id_category
-      getId('format').value = dataParams.format
-      getId('number').value = dataParams.number
-      getId('source').value = dataParams.source
-      getId('year').value = dataParams.year
+      setId(dataParams.id)
+      setFileName(dataParams.file_name)
+      setNumber(dataParams.number)
+      setSource(dataParams.source)
+      setFormat(dataParams.format)
+      setIdCategory(dataParams.id_category)
 
       setImgSrc('http://localhost:8000/'+dataParams.file)
 
     } else {
-      setTextInfo('tambah')
+      // for create new
+      setTextInfo('buat file baru')
+      setTextFileInput('upload file')
+      setIsRequired(true)
       getId('btnCreate').classList.remove('hidden')
       getId('btnUpdate').classList.add('hidden')
+      cleanUpFormInput()
     }
 
     // getId('errorMsg').classList.add('hidden')
     getId('modalForm').showModal()
   }
 
-  const openModalConfirm = (uuid) => {
-    setUuid(uuid)
-    getId('modalConfirm').showModal()
+  const cekData = () => {
+    console.log({source, number, format, idCategory});
   }
 
-  const handleChange = (fieldName, event) => {
-    meta.current[fieldName] = event.target.value;
-  };
-
-  const handleChangeFile = (fieldName, event) => {
-    meta.current[fieldName] = event.target.files[0];
-
-    let fileName = meta.current.file_upload.name
-    let firstPart = fileName.split('.')[0]
-    let fileFormat = fileName.split('.').pop();
-
-    meta.current.file_name = firstPart
-    meta.current.format = fileFormat
-
-    getId('file_name').value = firstPart
-    getId('format').value = fileFormat
-  };
-
-  const validateInput =  () => {
-    if (categoryName == '') {
-      getId('errorMsg').classList.remove('hidden')
-      return false
-    } else {
-      getId('errorMsg').classList.add('hidden')
-      getId('closeBtn').click()
-      return true
-    }
+  const openModalConfirm = (idSelected) => {
+    setId(idSelected)
+    getId('modalConfirm').showModal()
   }
 
   const createData = async () => {
     try {
-      const formData = new FormData();
-      const fields = ['id_user', 'id_category', 'file_name', 'number', 'source', 'format', 'year', 'file_upload'];
-      fields.forEach(field => {
-        formData.append(field, meta.current[field]);
-      });
 
-      getId('closeBtn').click()
-      await CreateFile(formData)
-      setTimeout(() => { getAllData() }, 100)
+      if (fileName == '') getId('fileNameError').classList.remove('hidden')
+      if (fileUpload == '') getId('fileUploadError').classList.remove('hidden')
 
+      if (fileName && fileUpload) {
+        const formData = new FormData();
+        formData.append('id_user', meta.current.id_user)
+        formData.append('id_category', idCategory)
+        formData.append('file_name', fileName)
+        formData.append('number', number)
+        formData.append('source', source)
+        formData.append('format', format)
+        formData.append('file_upload', fileUpload)
+  
+        getId('closeBtn').click()
+        await CreateFile(formData)
+        setTimeout(() => { getAllData() }, 100)
+      }
     } catch (error) {
       console.log(error, '<-- error create dokumen');
     }
@@ -130,32 +157,29 @@ const Document = () => {
 
   const updateData = async () => {
     try {
-      // const validate = validateInput()
-      // if (validate) {
-      //   await UpdateFile({})
-      //   getAllData()
-      // }
+      if (fileName == '') getId('fileNameError').classList.remove('hidden')
 
-      const formData = new FormData();
-      const fields = ['id', 'id_category', 'file_name', 'number', 'source', 'format', 'year', 'file_upload'];
-      fields.forEach(field => {
-        formData.append(field, meta.current[field]);
-      });
-      
-      getId('closeBtn').click()
-      await UpdateFile(formData)
-      setTimeout(() => { getAllData() }, 100)
-
-
-    } catch (error) {
-
-    }
+      if (fileName) {
+        const formData = new FormData();
+        formData.append('id', id)
+        formData.append('id_category', idCategory)
+        formData.append('file_name', fileName)
+        formData.append('number', number)
+        formData.append('source', source)
+        formData.append('format', format)
+        formData.append('file_upload', fileUpload)
+        
+        getId('closeBtn').click()
+        await UpdateFile(formData)
+        setTimeout(() => { getAllData() }, 100)
+      }
+    } catch (error) {}
   }
 
   const deleteData = async () => {
     try {
       getId('closeBtnConfirm').click()
-      await DeleteFile(uuid)
+      await DeleteFile(id)
       getAllData()
     } catch (error) {
       setTextAlert('Terjadi kesalahan!')
@@ -163,19 +187,10 @@ const Document = () => {
     }
   }
 
-  const getDataCategory = async () => {
-    try {
-      const result = await GetAllCategory()
-      setDataCategory(result.data)
-    } catch (error) {
-      
-    }
-  }
 
   useEffect(() => {
     getAllData()
-    getDataCategory()
-  }, [])
+  }, [params.id])
 
 
   const badge = (text) => {
@@ -186,8 +201,12 @@ const Document = () => {
       badgeClass = 'bg-red-400'
     } else if (text == 'docx') {
       badgeClass = 'bg-blue-400'
-    } else if (text == 'jpg' || 'png' || 'jpeg') {
+    } else if (text == 'xls' || text == 'xlsx' || text == 'csv') {
       badgeClass = 'bg-green-500'
+    } else if (text == 'jpg' || text ==  'png' || text == 'jpeg') {
+      badgeClass = 'bg-yellow-500'
+    } else {
+      badgeClass = 'bg-gray-500'
     }
 
     return <div className={`badge ${badgeClass} font-thin text-white pb-1`}>{text}</div>
@@ -201,7 +220,7 @@ const Document = () => {
         <Container>
 
           <div className='flex justify-end mb-4'>
-            <button className={btnClass} onClick={()=>openModal()}>tambah Dokumen <i className="fa-solid fa-plus"></i></button>
+            <button className={btnClass} onClick={()=>openModal()}>buat file baru <i className="fa-solid fa-plus"></i></button>
           </div>
           
           <ContainerRow className='-mx-3'>
@@ -218,8 +237,8 @@ const Document = () => {
                 {data.map((data, index) => (
                   <tr key={data.id}>
                     <TableData text={index+1} />
-                    <TableData text={data.file_name} />
-                    <TableData text={badge(data.format)} pl='pl-2' />
+                    <TableData text={limitText(data.file_name)} />
+                    <TableData text={<BadgeFormatFile text={data.format} />} pl='pl-2' />
                     <TableData text={data.category_name} />
                     <TableData text='' className='w-full' />
                     <TableData text={
@@ -256,31 +275,25 @@ const Document = () => {
       {/* modal for form input */}
       <ModalForm
         id='modalForm'
+        full={true}
         fill={<>
-          <h3 className="font-bold text-lg capitalize">{textInfo} dokumen</h3>
+          <h3 className="font-bold text-lg capitalize">{textInfo}</h3>
 
-          <div className=''>
-            <BaseInput text='upload file*' type='file' onChange={(event) => handleChangeFile('file_upload', event)} />
-            <img src={imgSrc} className='w-full rounded-md my-4' />
+          <div>
+            <InputColumn idError='fileUploadError' text={textFileInput} type='file' onChange={handleInputFile} name='file_upload' id='fileUpload' required={isRequired} />
+            {/* <img src={imgSrc} id='' className='w-full rounded-md my-4' /> */}
             {/* <embed src={imgSrc} type="application/pdf" className='w-full' height="400" /> */}
-            <BaseInput text='nama dokumen*' id='file_name' onChange={(event) => handleChange('file_name', event)} />
-            <SelectInput text='kategori/jenis*' id='category' onChange={(event) => handleChange('id_category', event)} option={
-              dataCategory.map((data) => (
-                <option key={data.id} value={data.id}>{data.name}</option>
-              ))
-            } />
-            <BaseInput text='format file' id='format' onChange={(event) => handleChange('format', event)} />
-            <BaseInput text='nomor surat' id='number' onChange={(event) => handleChange('number', event)} />
-            <BaseInput text='sumber/dari' id='source' onChange={(event) => handleChange('source', event)} />
-            <BaseInput text='tahun' id='year' onChange={(event) => handleChange('year', event)} />
+            <InputColumn idError='fileNameError' className='mt-6' text='nama file' id='file_name' onChange={handleInput} name='file_name' value={fileName} required />
+            <InputColumn text='nomor surat' id='number' onChange={handleInput} name='number' value={number} />
+            <InputColumn text='sumber/dari' id='source' onChange={handleInput} name='source' value={source} />
           </div>
 
         </>}
 
         addButton={<>
-          <button className='btn' onClick={() => console.log(meta)}>cek data meta</button>
-          <button className={"btn hidden "+btnClass} id='btnCreate' onClick={createData}>Tambah</button>
-          <button className={"btn hidden "+btnClass} id='btnUpdate' onClick={updateData}>Perbarui</button>
+          <button className='btn' onClick={cekData}>cek data</button>
+          <button className={"btn hidden "+btnClass} id='btnCreate' onClick={createData}>buat</button>
+          <button className={"btn hidden "+btnClass} id='btnUpdate' onClick={updateData}>simpan</button>
         </>}
       />
 

@@ -8,3 +8,48 @@
 * {
   font-family: 'nucleo', sans-serif; /* Gunakan nama font yang Anda tentukan di atas */
 }
+
+.fa-ellipsis-vertical {
+  display: none;
+}
+
+.hovered:hover .fa-ellipsis-vertical {
+  display: inline-block;
+}
+
+.dropdown-content {
+  position: relative;
+}
+
+.dropdown-content::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  right: 9px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 10px 10px 10px;
+  border-color: transparent transparent #d1d5db transparent;
+}
+
+.dropdown-content::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 9px 9px 9px;
+  border-color: transparent transparent #fff transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b9c0b9;
+  border-radius: 20px;
+}

@@ -15,6 +15,6 @@ export const callApi = (method, url, data = null) => {
   }, headers())
   .then(response => response.data)
   .catch(error => {
-    throw error.response.data
+    return error.response.data
   });
 };

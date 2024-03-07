@@ -23,6 +23,10 @@ export const RoutesTemplate = () => {
       element: <Document/>
     },
     {
+      path: '/document/:id',
+      element: <Document/>
+    },
+    {
       path: '/category',
       element: <Category/>
     },
