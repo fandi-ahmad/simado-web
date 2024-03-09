@@ -6,28 +6,7 @@ import { CreateCategory, DeleteCategory, GetAllCategory, UpdateCategory } from '
 import { getId } from '../function/baseFunction'
 import { ModalAlert, ModalForm } from './BaseModal'
 import { BaseInput } from './BaseInput'
-
-const aClass = 'py-2.7 text-sm ease-nav-brand my-0 flex items-center whitespace-nowrap px-4 transition-colors hover:text-gray-600 hover:font-semibold'
-const aClassActive = 'py-2.7 shadow-soft-xl text-sm ease-nav-brand my-0 flex items-center whitespace-nowrap rounded-lg bg-white px-4 font-semibold text-slate-700 transition-colors'
-const divClass = 'shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5'
-const divClassActive = 'bg-gradient-to-tl text-white from-purple-700 to-pink-500 shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5'
-
-const listMenu = (icon, title, to) => {
-  const navigate = useNavigate()
-  const path = location.pathname
-
-  return (
-    <li className="mt-0.5 w-full cursor-pointer">
-      <a  onClick={() => navigate(to)} className={path === to ? aClassActive : aClass}>
-        <div className={path === to ? divClassActive : divClass}>
-          <i className={"fa-solid " + icon}></i>
-        </div>
-        <span className="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">{title}</span>
-      </a>
-    </li>
-  )
-}
-
+import { ListMenu, ListMenuChild, SubListMenu } from './sidebarPart'
 
 const Sidebar = () => {
   const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
@@ -146,15 +125,12 @@ const Sidebar = () => {
         <div className="items-center block w-auto max-h-screen grow basis-full">
           <ul className="flex flex-col pl-0 mb-0">
 
-            {listMenu('fa-house', 'Dashboard', '/')}
-            {listMenu('fa-file', 'Semua Dokumen', '/document')}
-            {listMenu('fa-users', 'Pengguna', '/user')}
+            <ListMenu icon='fa-house' text='Beranda' to='/' />
+            <ListMenu icon='fa-file' text='Semua Dokumen' to='/document' />
+            <ListMenu icon='fa-users' text='Pengguna' to='/user' />
 
-            <li className="w-full mt-4">
-              <h6 className="pl-4 text-xs font-bold leading-tight uppercase opacity-60">
-                Kategori
-              </h6>
-            </li>
+           
+            <SubListMenu text='Kategori' />
 
             <li className='w-full cursor-pointer px-4 text-sm'>
               {dataCategory.map((data) => (
@@ -186,15 +162,15 @@ const Sidebar = () => {
               </div>
             </li>
 
+            <SubListMenu text='Data Siswa' className='mt-8' />
+            <ListMenuChild text='Rapor' to='/rapor/study-year' />
+            <ListMenuChild text='Ijazah' />
 
-            <li className="w-full mt-4">
-              <h6 className="pl-4 text-xs font-bold leading-tight uppercase opacity-60">
-                Account pages
-              </h6>
-            </li>
 
-            {listMenu('fa-user', 'Profile')}
-            {listMenu('fa-right-from-bracket', 'Log Out')}
+            <SubListMenu text='Akun' />
+            <ListMenu icon='fa-user' text='Profile' to='/' />
+            <ListMenu icon='fa-right-from-bracket' text='Keluar' to='/' />
+
 
           </ul>
         </div>      

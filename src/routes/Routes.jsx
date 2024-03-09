@@ -4,6 +4,7 @@ import Profile from "../pages/Profile";
 import Login from "../pages/Login";
 import Document from "../pages/Document";
 import User from "../pages/User";
+import StudyYear from "../pages/rapor/StudyYear";
 
 export const RoutesTemplate = () => {
 
@@ -24,6 +25,10 @@ export const RoutesTemplate = () => {
     {
       path: '/document/:id',
       element: <Document/>
+    },
+    {
+      path: '/rapor/study-year',
+      element: <StudyYear/>
     },
     {
       path: '/user',
