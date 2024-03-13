@@ -1,19 +1,20 @@
 import { React, useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
 import { Container, Main } from '../../components/BaseLayout'
-import Navbar from '../../components/Navbar'
+import { useNavigate, useParams } from 'react-router-dom'
 import { CardFolder } from '../../components/BaseCard'
-import { useParams, useNavigate } from 'react-router-dom'
-import { GetAllStudyYear } from '../../api/studyYear'
-import { GetAllClass, CreateClass, DeleteClass, UpdateClass } from '../../api/class'
+import Navbar from '../../components/Navbar'
+import { GetAllStudyYear } from '../../api/student/studyYear'
+import { GetAllClass } from '../../api/student/class'
 
-const ClassName = () => {
+const StudentRaporByClass = () => {
   const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const params = useParams()
   const navigate = useNavigate()
   const idStudyYear = params.id_study_year
+  const idClassName =  params.id_class_name
   const [studyYearName, setStudyYearName] = useState('')
-  const [data, setData] = useState([])
+  const [className, setClassName] = useState('')
 
   const getStudyYearById = async () => {
     try {
@@ -22,38 +23,37 @@ const ClassName = () => {
     } catch (error) {}
   }
 
-  const getAllData = async () => {
+  const getClassById = async () => {
     try {
-      const result = await GetAllClass()
-      setData(result.data)
+      const result = await GetAllClass(idClassName)
+      result.status == 200 ? setClassName(result.data.class_name) : navigate('/rapor/study-year')
     } catch (error) {}
   }
 
-
   useEffect(() => {
     getStudyYearById()
-    getAllData()
+    getClassById()
   }, [])
-
 
   return (
     <>
       <Sidebar/>
       <Main>
-        <Navbar page={`rapor / tahun ajar / ${studyYearName} / kelas`} pageTitle='kelas' />
+        <Navbar page={`rapor / tahun ajar / ${studyYearName} / kelas / ${className}`} pageTitle={className} />
         <Container>
 
           <div className='flex justify-end mb-4'>
-            <button className={'mr-2 '+btnClass} >buat nama kelas baru <i className="fa-solid fa-plus"></i></button>
+            <button className={'mr-2 '+btnClass} >buat rapor siswa baru <i className="fa-solid fa-plus"></i></button>
           </div>
 
           <div className='grid grid-cols-4'>
-            {data.map((data) => (
-              <CardFolder key={data.id} text={data.class_name}
-                onClick={() => navigate(data.id)}
-              />
-            ))}
+            <CardFolder text='XI ipa 1'  />
+            <CardFolder text='XI ipa 2' />
+            <CardFolder text='XI ipa 3' />
+            <CardFolder text='XI ips 1' />
+            
           </div>
+
 
         </Container>
 
@@ -62,4 +62,4 @@ const ClassName = () => {
   )
 }
 
-export default ClassName
+export default StudentRaporByClass

@@ -1,4 +1,4 @@
-import { callApi } from "./utils"
+import { callApi } from "../utils"
 
 export const GetAllStudyYear = (id = '') => {
   return callApi('get', `/student/study/${id}`)

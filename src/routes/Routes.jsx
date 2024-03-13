@@ -4,10 +4,10 @@ import Profile from "../pages/Profile";
 import Login from "../pages/Login";
 import Document from "../pages/Document";
 import User from "../pages/User";
-import StudyYear from "../pages/rapor/StudyYear";
-import ClassName from "../pages/rapor/ClassName";
-import Student from "../pages/Student";
-import StudentRaporByClass from "../pages/rapor/StudentRaporByClass";
+import StudyYear from "../pages/student/StudyYear";
+import ClassName from "../pages/student/ClassName";
+import Student from "../pages/student/Student";
+import StudentRaporByClass from "../pages/student/StudentRaporByClass";
 
 export const RoutesTemplate = () => {
 
