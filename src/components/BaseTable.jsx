@@ -40,3 +40,14 @@ export const BaseTable = (props) => {
     </div>
   )
 }
+
+export const ActionListData = (props) => {
+  return (
+    <li onClick={props.onClick}>
+      <a className='py-1'>
+        <i className={`fa-solid ${props.icon} w-4`}></i>
+        <span className='pb-1'>{props.text}</span>
+      </a>
+    </li>
+  )
+}

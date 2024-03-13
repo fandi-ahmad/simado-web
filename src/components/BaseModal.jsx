@@ -3,7 +3,7 @@ import React from 'react'
 export const ModalForm = (props) => {
   const full = props.full || false
   return (
-    <dialog id={props.id} className={`modal ${full ? 'px-12' : ''}`}>
+    <dialog id={props.id || 'modalForm'} className={`modal ${full ? 'px-12' : ''}`}>
       <div className={`modal-box ${full ? 'min-w-fit' : ''}`}>
         {props.fill}
         <div className="modal-action">

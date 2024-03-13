@@ -2,14 +2,14 @@ import { React, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
-import { BaseTable, TableHead, TableData } from '../components/BaseTable'
+import { BaseTable, TableHead, TableData, ActionListData } from '../components/BaseTable'
 import { Main, Container, ContainerRow } from '../components/BaseLayout'
 import { GetAllFile, CreateFile, DeleteFile, UpdateFile, GetAllFileByCategory } from '../api/file'
 import { downloadFile, getId, limitText } from '../function/baseFunction'
 import { ModalAlert, ModalForm } from '../components/BaseModal'
 import { InputColumn, SelectInput } from '../components/BaseInput'
 import { BadgeFormatFile } from '../components/Badge'
-import { GetAllCategory } from '../api/category'
+import { GetAllCategory, CreateCategory, DeleteCategory, UpdateCategory } from '../api/category'
 
 
 const Document = () => {
@@ -29,7 +29,7 @@ const Document = () => {
   const [idCategory, setIdCategory] = useState('')
   const [categoryName, setCategoryName] = useState('')
   const meta = useRef({
-    id_user: 'acf821a5-1f1a-4869-a3b9-6e7ab5cf176b' //temporary
+    id_user: 'd2321c4d-392e-4625-84df-545a3963a589' //temporary
   })
   const params = useParams()
   const navigate = useNavigate()
@@ -90,6 +90,7 @@ const Document = () => {
 
   const openModal = (dataParams = '') => {
     setId(dataParams.id)
+    cleanUpFormInput()
 
     if (dataParams.id) {
       // for edit
@@ -107,7 +108,6 @@ const Document = () => {
       setIsRequired(true)
       getId('btnCreate').classList.remove('hidden')
       getId('btnUpdate').classList.add('hidden')
-      cleanUpFormInput()
     }
 
     // getId('errorMsg').classList.add('hidden')
@@ -159,6 +159,7 @@ const Document = () => {
         formData.append('file_upload', fileUpload)
         
         getId('closeBtn').click()
+        getId('closeBtnChangeCategory').click()
         await UpdateFile(formData)
         setTimeout(() => { getAllData() }, 100)
       }
@@ -195,17 +196,6 @@ const Document = () => {
   useEffect(() => {
     getAllData()
   }, [params.id])
-
-  const actionList = (icon, text, onClick) => {
-    return (
-      <li onClick={onClick}>
-        <a className='py-1'>
-          <i className={`fa-solid ${icon} w-4`}></i>
-          <span className='pb-1'>{text}</span>
-        </a>
-      </li>
-    )
-  }
 
   return (
     <>
@@ -249,12 +239,12 @@ const Document = () => {
                               <i className="fa-solid fa-ellipsis-vertical"></i>
                             </button>
                             <ul tabIndex={10} className="dropdown-content z-10 absolute menu p-2 shadow bg-base-100 rounded-md w-52 border border-gray-300 font-medium">
-                              {actionList('fa-download', 'Download', () => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file))}
-                              {actionList('fa-eye', 'Lihat', () => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank'))}
-                              {actionList('fa-circle-info', 'Detail')}
-                              {actionList('fa-pen-to-square', 'Edit', () => openModal(data))}
-                              {actionList('fa-up-down-left-right', 'Pindahkan', () => openModalChangeCategory(data))}
-                              {actionList('fa-trash-can', 'Hapus', () => openModalConfirm(data.id))}
+                              <ActionListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
+                              <ActionListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
+                              <ActionListData icon='fa-circle-info' text='Detail' />
+                              <ActionListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
+                              <ActionListData icon='fa-up-down-left-right' text='Pindahkan' onClick={() => openModalChangeCategory(data)} />
+                              <ActionListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
                             </ul>
                           </div>
                         </>
@@ -283,6 +273,7 @@ const Document = () => {
           } />
         </>}
 
+        idCloseBtn='closeBtnChangeCategory'
         addButton={<>
           <button className={"btn "+btnClass} onClick={updateData}>simpan</button>
         </>}

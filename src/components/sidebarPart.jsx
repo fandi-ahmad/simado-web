@@ -33,9 +33,13 @@ export const SubListMenu = (props) => {
 
 export const ListMenuChild = (props) => {
   const navigate = useNavigate()
+  const path = location.pathname
+  const pathPart = path.split('/')
+  const firstNavigate = pathPart.slice(0, 3).join("/");
+
   return (
     <li className='w-full cursor-pointer px-4 text-sm'>
-      <div className={props.className || 'hover:text-gray-700 hover:font-semibold flex justify-between items-center hovered'}>
+      <div className={path == props.to || firstNavigate == props.to ? 'text-gray-700 font-semibold flex justify-between items-center hovered' : 'hover:text-gray-700 hover:font-semibold flex justify-between items-center hovered'}>
         <div onClick={() => navigate(props.to)} className='py-1 w-full'>
           <i className={`fa-solid ${props.icon || 'fa-caret-right'}`}></i>
           <span className='pl-4'>{props.text}</span>

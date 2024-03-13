@@ -147,8 +147,8 @@ const Sidebar = () => {
                   </div>
 
                   <ul tabIndex={1} className="dropdown-content z-10 menu p-2 drop-shadow-md bg-base-100 rounded-md border border-gray-300 w-52">
-                    <li onClick={() => openModal(data.name, data.id)}><a>Edit</a></li>
-                    <li onClick={() => openModalConfirm(data.id)}><a>Hapus Kategori</a></li>
+                    <li onClick={() => openModal(data.name, data.id)}><a>Ganti nama</a></li>
+                    <li onClick={() => openModalConfirm(data.id)}><a>Hapus kategori</a></li>
                   </ul>
 
                 </div>
@@ -163,6 +163,7 @@ const Sidebar = () => {
             </li>
 
             <SubListMenu text='Data Siswa' className='mt-8' />
+            <ListMenuChild text='Data siswa' to='/data/student' />
             <ListMenuChild text='Rapor' to='/rapor/study-year' />
             <ListMenuChild text='Ijazah' />
 

@@ -3,8 +3,11 @@ import React from 'react'
 export const BaseInput = (props) => {
   return (
     <div className={props.className} id={props.idField}>
-      <p className="pt-4 mb-2">{props.text}</p>
-      <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} className="input input-bordered w-full" />
+      <div>
+        <p className="pt-4 mb-2">{props.text}</p>
+        <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} className="input input-bordered w-full" />
+      </div>
+      <p className={'text-red-400 text-sm hidden '+props.classError} id={props.idError}>{props.errorText || 'Input tidak boleh kosong'}</p>
     </div>
   )
 }
