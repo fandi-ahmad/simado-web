@@ -35,3 +35,11 @@ export const downloadFile = async (fileUrl) => {
     console.error('Error downloading file:', error);
   }
 };
+
+export const limitText = (text, limit = 30) => {
+  if (text.length <= limit) {
+    return text;
+  } else {
+    return text.substring(0, limit) + "...";
+  }
+}

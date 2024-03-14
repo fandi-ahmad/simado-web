@@ -4,12 +4,16 @@ export const GetAllFile = () => {
   return callApi('get', '/file')
 }
 
+export const GetAllFileByCategory = (id) => {
+  return callApi('get', '/file/category/'+id)
+}
+
 export const CreateFile = (data) => {
   return callApi('post', '/file/create', data)
 }
 
-export const DeleteFile = (uuid) => {
-  return callApi('delete', '/file/delete/'+uuid)
+export const DeleteFile = (id) => {
+  return callApi('delete', '/file/delete/'+id)
 }
 
 export const UpdateFile = (data) => {

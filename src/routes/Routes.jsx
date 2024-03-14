@@ -1,10 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/Dashboard";
 import Profile from "../pages/Profile";
-import Category from "../pages/Category";
 import Login from "../pages/Login";
 import Document from "../pages/Document";
 import User from "../pages/User";
+import StudyYear from "../pages/student/StudyYear";
+import ClassName from "../pages/student/ClassName";
+import Student from "../pages/student/Student";
+import StudentRaporByClass from "../pages/student/StudentRaporByClass";
 
 export const RoutesTemplate = () => {
 
@@ -23,8 +26,24 @@ export const RoutesTemplate = () => {
       element: <Document/>
     },
     {
-      path: '/category',
-      element: <Category/>
+      path: '/document/:id',
+      element: <Document/>
+    },
+    {
+      path: '/data/student',
+      element: <Student/>
+    },
+    {
+      path: '/rapor/study-year',
+      element: <StudyYear/>
+    },
+    {
+      path: '/rapor/study-year/:id_study_year/class',
+      element: <ClassName/>
+    },
+    {
+      path: '/rapor/study-year/:id_study_year/class/:id_class_name',
+      element: <StudentRaporByClass/>
     },
     {
       path: '/user',

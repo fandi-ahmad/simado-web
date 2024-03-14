@@ -40,3 +40,36 @@ export const ContainerWhiteCard = (props) => {
     </div>
   )
 }
+
+export const CardFolder = (props) => {
+  const actionList = (icon, text, onClick) => {
+    return (
+      <li onClick={onClick}>
+        <a className='py-1'>
+          <i className={`fa-solid ${icon} w-4`}></i>
+          <span className='pb-1'>{text}</span>
+        </a>
+      </li>
+    )
+  }
+
+  return (
+    <div className='w-full px-2 pb-4 dropdown dropdown-end'>
+      <div className='bg-white drop-shadow-md hover:bg-gray-200 flex justify-between items-center rounded-md cursor-pointer'>
+        <div onClick={props.onClick} className='w-full py-4 pl-4'>
+          <i className="fa-solid fa-folder text-lg text-yellow-500"></i>
+          <span className='ml-2'>{props.text}</span>
+        </div>
+        <span tabIndex={0} role='button' className='px-2.5 mr-4 py-0.5 rounded-full hover:bg-gray-300'>
+          <i className="fa-solid fa-ellipsis-vertical"></i>
+        </span>
+      </div>
+
+      <ul tabIndex={1} className="dropdown-content z-10 menu mr-4 p-2 drop-shadow-md bg-base-100 rounded-md border border-gray-300 w-52">
+        {actionList('fa-pen-to-square', 'Ganti nama', props.onClickEdit)}
+        {actionList('fa-circle-info', 'Detail')}
+        {actionList('fa-trash-can', 'Hapus', props.onClickDelete)}
+      </ul>
+    </div>
+  )
+}

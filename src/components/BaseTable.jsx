@@ -23,7 +23,7 @@ export const BaseTable = (props) => {
           <h6>{props.name}</h6>
         </div>
         <div className="flex-auto px-0 pt-0 pb-2">
-          <div className="p-0 overflow-x-auto">
+          <div className="p-0 ">
             <table className="items-center w-full mb-0 align-top text-slate-500">
               <thead className="align-bottom">
                 <tr>
@@ -38,5 +38,16 @@ export const BaseTable = (props) => {
         </div>
       </div>
     </div>
+  )
+}
+
+export const ActionListData = (props) => {
+  return (
+    <li onClick={props.onClick}>
+      <a className='py-1'>
+        <i className={`fa-solid ${props.icon} w-4`}></i>
+        <span className='pb-1'>{props.text}</span>
+      </a>
+    </li>
   )
 }

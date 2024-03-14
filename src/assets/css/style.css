@@ -8,3 +8,95 @@
 * {
   font-family: 'nucleo', sans-serif; /* Gunakan nama font yang Anda tentukan di atas */
 }
+
+.fa-vertical {
+  display: none;
+}
+
+.hovered:hover .fa-vertical {
+  display: inline-block;
+}
+
+.dropdown-content {
+  position: relative;
+}
+
+.dropdown-content::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  right: 9px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 10px 10px 10px;
+  border-color: transparent transparent #d1d5db transparent;
+}
+
+.dropdown-content::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 9px 9px 9px;
+  border-color: transparent transparent #fff transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b9c0b9;
+  border-radius: 20px;
+}
+
+.custum-file-upload {
+  /* display: flex; */
+  flex-direction: column;
+  align-items: space-between;
+  gap: 20px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0px 48px 35px -48px rgba(0,0,0,0.1);
+}
+
+.custum-file-upload-border {
+  border: 2px dashed #cacaca;
+}
+
+.custum-file-upload-border-filled {
+  border: 2px dashed #22c55e
+}
+
+.custum-file-upload .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custum-file-upload .icon svg {
+  height: 80px;
+  fill: rgba(75, 85, 99, 1);
+}
+
+.custum-file-upload .text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custum-file-upload .text span {
+  font-weight: 400;
+  color: rgba(75, 85, 99, 1);
+}
+
+.custum-file-upload input {
+  display: none;
+}

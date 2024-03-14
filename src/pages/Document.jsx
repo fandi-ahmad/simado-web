@@ -1,74 +1,111 @@
 import { React, useEffect, useRef, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
-import { BaseTable, TableHead, TableData } from '../components/BaseTable'
+import { BaseTable, TableHead, TableData, ActionListData } from '../components/BaseTable'
 import { Main, Container, ContainerRow } from '../components/BaseLayout'
-import { GetAllFile, CreateFile, DeleteFile, UpdateFile } from '../api/file'
-import { GetAllCategory } from '../api/category'
-import { downloadFile, getId } from '../function/baseFunction'
+import { GetAllFile, CreateFile, DeleteFile, UpdateFile, GetAllFileByCategory } from '../api/file'
+import { downloadFile, getId, limitText } from '../function/baseFunction'
 import { ModalAlert, ModalForm } from '../components/BaseModal'
-import { BaseInput, SelectInput } from '../components/BaseInput'
-import { ContainerWhiteCard } from '../components/BaseCard'
+import { InputColumn, SelectInput } from '../components/BaseInput'
+import { BadgeFormatFile } from '../components/Badge'
+import { GetAllCategory, CreateCategory, DeleteCategory, UpdateCategory } from '../api/category'
 
 
 const Document = () => {
   const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const [data, setData] = useState([])
   const [dataCategory, setDataCategory] = useState([])
-  const [uuid, setUuid] = useState('')
-  const [textInfo, setTextInfo] = useState('tambah')
+  const [id, setId] = useState('')
+  const [textInfo, setTextInfo] = useState('')
   const [textAlert, setTextAlert] = useState('')
+  const [textFileInput, setTextFileInput] = useState('upload file')
+  const [isRequired, setIsRequired] = useState(false)
+  const [fileUpload, setFileUpload] = useState('')
+  const [fileName, setFileName] = useState('')
+  const [number, setNumber] = useState('')
+  const [source, setSource] = useState('')
+  const [format, setFormat] = useState('')
+  const [idCategory, setIdCategory] = useState('')
+  const [categoryName, setCategoryName] = useState('')
   const meta = useRef({
-    id: '',
-    file_name: '',
-    file_upload: '',
-    number: '',
-    source: '',
-    year: '',
-    format: '',
-    id_category: '',
-    id_user: 'acf821a5-1f1a-4869-a3b9-6e7ab5cf176b'
+    id_user: 'd2321c4d-392e-4625-84df-545a3963a589' //temporary
   })
-  const [imgSrc, setImgSrc] = useState('')
+  const params = useParams()
+  const navigate = useNavigate()
+
 
   const getAllData = async () => {
     try {
-      const result = await GetAllFile()
-      setData(result.data)
-    } catch (error) {
-      
+      const result = params.id ? await GetAllFileByCategory(params.id) : await GetAllFile();
+      if (result.data) setData(result.data); setCategoryName(result.category);
+      if (result.status == 404) navigate('/document')
+      if (params.id) setIdCategory(params.id)
+    } catch (error) {}
+  }
+
+  const cleanUpFormInput = () => {
+    setFileUpload('')
+    setFileName('')
+    setNumber('')
+    setSource('')
+    setFormat('')
+    getId('fileUpload').value = ''
+    getId('fileUploadError').classList.add('hidden')
+    getId('fileNameError').classList.add('hidden')
+  }
+
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case 'file_name': setFileName(value); break;
+      case 'source': setSource(value); break;
+      case 'number': setNumber(value); break;
+      case 'category': setIdCategory(value); break;
+      default: break;
     }
+  };
+
+  const handleInputFile = (e) => {
+    const imageSelect = e.target.files[0]
+    setFileUpload(imageSelect)
+
+    let fileName = imageSelect.name.split('.')
+    let firstPart = fileName[0]
+    let fileFormat = fileName.pop();
+
+    setFileName(firstPart)
+    setFormat(fileFormat)
+  };
+
+  const selectedDataFile = (dataParams) => {
+    setId(dataParams.id)
+    setFileName(dataParams.file_name)
+    setNumber(dataParams.number)
+    setSource(dataParams.source)
+    setFormat(dataParams.format)
+    setIdCategory(dataParams.id_category)
+    setCategoryName(dataParams.category_name)
   }
 
   const openModal = (dataParams = '') => {
-    setUuid(dataParams.id)
-
-    console.log(dataParams, '<-- data params');
+    setId(dataParams.id)
+    cleanUpFormInput()
 
     if (dataParams.id) {
-      setTextInfo('perbarui')
+      // for edit
+      setTextInfo('edit file')
+      setTextFileInput('upload file baru')
+      setIsRequired(false)
       getId('btnCreate').classList.add('hidden')
       getId('btnUpdate').classList.remove('hidden')
 
-      meta.current.id = dataParams.id
-      meta.current.file_name = dataParams.file_name
-      meta.current.id_category = dataParams.id_category
-      meta.current.format = dataParams.format
-      meta.current.number = dataParams.number
-      meta.current.source = dataParams.source
-      meta.current.year = dataParams.year
-
-      getId('file_name').value = dataParams.file_name
-      getId('category').value = dataParams.id_category
-      getId('format').value = dataParams.format
-      getId('number').value = dataParams.number
-      getId('source').value = dataParams.source
-      getId('year').value = dataParams.year
-
-      setImgSrc('http://localhost:8000/'+dataParams.file)
-
+      selectedDataFile(dataParams)
     } else {
-      setTextInfo('tambah')
+      // for create new
+      setTextInfo('buat file baru')
+      setTextFileInput('upload file')
+      setIsRequired(true)
       getId('btnCreate').classList.remove('hidden')
       getId('btnUpdate').classList.add('hidden')
     }
@@ -77,52 +114,31 @@ const Document = () => {
     getId('modalForm').showModal()
   }
 
-  const openModalConfirm = (uuid) => {
-    setUuid(uuid)
+  const openModalConfirm = (idSelected) => {
+    setId(idSelected)
     getId('modalConfirm').showModal()
-  }
-
-  const handleChange = (fieldName, event) => {
-    meta.current[fieldName] = event.target.value;
-  };
-
-  const handleChangeFile = (fieldName, event) => {
-    meta.current[fieldName] = event.target.files[0];
-
-    let fileName = meta.current.file_upload.name
-    let firstPart = fileName.split('.')[0]
-    let fileFormat = fileName.split('.').pop();
-
-    meta.current.file_name = firstPart
-    meta.current.format = fileFormat
-
-    getId('file_name').value = firstPart
-    getId('format').value = fileFormat
-  };
-
-  const validateInput =  () => {
-    if (categoryName == '') {
-      getId('errorMsg').classList.remove('hidden')
-      return false
-    } else {
-      getId('errorMsg').classList.add('hidden')
-      getId('closeBtn').click()
-      return true
-    }
   }
 
   const createData = async () => {
     try {
-      const formData = new FormData();
-      const fields = ['id_user', 'id_category', 'file_name', 'number', 'source', 'format', 'year', 'file_upload'];
-      fields.forEach(field => {
-        formData.append(field, meta.current[field]);
-      });
 
-      getId('closeBtn').click()
-      await CreateFile(formData)
-      setTimeout(() => { getAllData() }, 100)
+      if (fileName == '') getId('fileNameError').classList.remove('hidden')
+      if (fileUpload == '') getId('fileUploadError').classList.remove('hidden')
 
+      if (fileName && fileUpload) {
+        const formData = new FormData();
+        formData.append('id_user', meta.current.id_user)
+        formData.append('id_category', idCategory)
+        formData.append('file_name', fileName)
+        formData.append('number', number)
+        formData.append('source', source)
+        formData.append('format', format)
+        formData.append('file_upload', fileUpload)
+  
+        getId('closeBtn').click()
+        await CreateFile(formData)
+        setTimeout(() => { getAllData() }, 100)
+      }
     } catch (error) {
       console.log(error, '<-- error create dokumen');
     }
@@ -130,32 +146,30 @@ const Document = () => {
 
   const updateData = async () => {
     try {
-      // const validate = validateInput()
-      // if (validate) {
-      //   await UpdateFile({})
-      //   getAllData()
-      // }
+      if (fileName == '') getId('fileNameError').classList.remove('hidden')
 
-      const formData = new FormData();
-      const fields = ['id', 'id_category', 'file_name', 'number', 'source', 'format', 'year', 'file_upload'];
-      fields.forEach(field => {
-        formData.append(field, meta.current[field]);
-      });
-      
-      getId('closeBtn').click()
-      await UpdateFile(formData)
-      setTimeout(() => { getAllData() }, 100)
-
-
-    } catch (error) {
-
-    }
+      if (fileName) {
+        const formData = new FormData();
+        formData.append('id', id)
+        formData.append('id_category', idCategory)
+        formData.append('file_name', fileName)
+        formData.append('number', number)
+        formData.append('source', source)
+        formData.append('format', format)
+        formData.append('file_upload', fileUpload)
+        
+        getId('closeBtn').click()
+        getId('closeBtnChangeCategory').click()
+        await UpdateFile(formData)
+        setTimeout(() => { getAllData() }, 100)
+      }
+    } catch (error) {}
   }
 
   const deleteData = async () => {
     try {
       getId('closeBtnConfirm').click()
-      await DeleteFile(uuid)
+      await DeleteFile(id)
       getAllData()
     } catch (error) {
       setTextAlert('Terjadi kesalahan!')
@@ -167,120 +181,123 @@ const Document = () => {
     try {
       const result = await GetAllCategory()
       setDataCategory(result.data)
-    } catch (error) {
-      
-    }
+    } catch (error) {}
+  }
+
+  const openModalChangeCategory = (dataParams) => {
+    selectedDataFile(dataParams)
+    getId('modalFormChangeCategory').showModal()
   }
 
   useEffect(() => {
-    getAllData()
     getDataCategory()
   }, [])
 
-
-  const badge = (text) => {
-
-    let badgeClass = 'bg-gray-400'
-
-    if (text == 'pdf') {
-      badgeClass = 'bg-red-400'
-    } else if (text == 'docx') {
-      badgeClass = 'bg-blue-400'
-    } else if (text == 'jpg' || 'png' || 'jpeg') {
-      badgeClass = 'bg-green-500'
-    }
-
-    return <div className={`badge ${badgeClass} font-thin text-white pb-1`}>{text}</div>
-  }
+  useEffect(() => {
+    getAllData()
+  }, [params.id])
 
   return (
     <>
       <Sidebar/>
       <Main>
-        <Navbar page='Dokumen' />
+        <Navbar 
+          page={params.id ? 'dokumen / '+categoryName : 'dokumen'}
+          pageTitle={params.id ? categoryName : 'dokumen'}
+        />
+
         <Container>
 
           <div className='flex justify-end mb-4'>
-            <button className={btnClass} onClick={()=>openModal()}>tambah Dokumen <i className="fa-solid fa-plus"></i></button>
+            <button className={btnClass} onClick={()=>openModal()}>buat file baru <i className="fa-solid fa-plus"></i></button>
           </div>
           
-          <ContainerRow className='-mx-3'>
-            <BaseTable
-              thead={<>
-                <TableHead text='No' className='w-12' />
-                <TableHead text='Nama File' />
-                <TableHead text='' />
-                <TableHead text='Kategori' />
-                <TableHead />
-              </>}
+          <ContainerRow className='-mx-3 relative'>
+            {!data[0] ? <div className='w-full text-center text-2xl'>-- belum ada data --</div> : 
+              <BaseTable
+                thead={<>
+                  <TableHead text='No' className='w-12' />
+                  <TableHead text='Nama File' />
+                  <TableHead text='' />
+                  <TableHead />
+                  {!params.id ? <TableHead text='Kategori' className='pr-20' /> : null}
+                  <TableHead />
+                </>}
 
-              tbody={<>
-                {data.map((data, index) => (
-                  <tr key={data.id}>
-                    <TableData text={index+1} />
-                    <TableData text={data.file_name} />
-                    <TableData text={badge(data.format)} pl='pl-2' />
-                    <TableData text={data.category_name} />
-                    <TableData text='' className='w-full' />
-                    <TableData text={
-                      <>
-                        <button className={'btn btn-sm btn-success text-white ms-4'} onClick={() => downloadFile('http://localhost:8000/'+data.file)}>Download</button>
-                        <button className={'btn btn-sm btn-info text-white ms-4'} onClick={() => openModal(data)}>Lihat</button>
-                        <button className={'btn btn-sm btn-primary ms-4'} onClick={() => openModal(data)}>Edit</button>
-                        <button className={'btn btn-sm btn-error text-white ms-4'} onClick={() => openModalConfirm(data.id)} >Hapus</button>
-                      </>
-                    } className='w-48' />
-                  </tr>
-                ))}
-              </>}
-            />
-          </ContainerRow>
-          
-          <ContainerRow className='-mx-3'>
-            <ContainerWhiteCard>
-            
-              <div className='border-gray-300 border max-w-fit rounded-md p-4'>
-                <div className='text-8xl text-red-400'>
-                  <i className="fa-regular fa-file-pdf"></i>
-                </div>
-                <div className='mt-2 font-normal'>nama-file.pdf</div>
-                <div className='text-sm'>nama-file.pdf</div>
-              </div>
+                tbody={<>
+                  {data.map((data, index) => (
+                    <tr key={data.id}>
+                      <TableData text={index+1} />
+                      <TableData text={limitText(data.file_name)} />
+                      <TableData text={<BadgeFormatFile text={data.format} />} pl='pl-2' />
+                      <TableData text='' className='w-full' />
+                      {!params.id ? <TableData text={data.category_name} /> : null}
+                      <TableData text={
+                        <>
+                          <div className='dropdown dropdown-end mr-4'>
+                            <button tabIndex={1} role='button' className='btn btn-sm'>
+                              <i className="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul tabIndex={10} className="dropdown-content z-10 absolute menu p-2 shadow bg-base-100 rounded-md w-52 border border-gray-300 font-medium">
+                              <ActionListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
+                              <ActionListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
+                              <ActionListData icon='fa-circle-info' text='Detail' />
+                              <ActionListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
+                              <ActionListData icon='fa-up-down-left-right' text='Pindahkan' onClick={() => openModalChangeCategory(data)} />
+                              <ActionListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
+                            </ul>
+                          </div>
+                        </>
+                      } className='w-48' />
+                    </tr>
+                  ))}
 
-            </ContainerWhiteCard>
+                  
+                </>}
+              />
+            }
           </ContainerRow>
 
         </Container>
       </Main>
 
+      {/* modal for form input change category */}
+      <ModalForm
+        id='modalFormChangeCategory'
+        fill={<>
+          <h3 className="font-semibold text-lg capitalize">Pindahkan "{fileName}"</h3>
+          <SelectInput text={'lokasi saat ini: '+ categoryName} id='category' name='category' onChange={handleInput} option={
+            dataCategory.map((data) => (
+              <option key={data.id} value={data.id}>{data.name}</option>
+            ))
+          } />
+        </>}
+
+        idCloseBtn='closeBtnChangeCategory'
+        addButton={<>
+          <button className={"btn "+btnClass} onClick={updateData}>simpan</button>
+        </>}
+      />
+
       {/* modal for form input */}
       <ModalForm
         id='modalForm'
+        full={true}
         fill={<>
-          <h3 className="font-bold text-lg capitalize">{textInfo} dokumen</h3>
+          <h3 className="font-bold text-lg capitalize">{textInfo}</h3>
 
-          <div className=''>
-            <BaseInput text='upload file*' type='file' onChange={(event) => handleChangeFile('file_upload', event)} />
-            <img src={imgSrc} className='w-full rounded-md my-4' />
-            {/* <embed src={imgSrc} type="application/pdf" className='w-full' height="400" /> */}
-            <BaseInput text='nama dokumen*' id='file_name' onChange={(event) => handleChange('file_name', event)} />
-            <SelectInput text='kategori/jenis*' id='category' onChange={(event) => handleChange('id_category', event)} option={
-              dataCategory.map((data) => (
-                <option key={data.id} value={data.id}>{data.name}</option>
-              ))
-            } />
-            <BaseInput text='format file' id='format' onChange={(event) => handleChange('format', event)} />
-            <BaseInput text='nomor surat' id='number' onChange={(event) => handleChange('number', event)} />
-            <BaseInput text='sumber/dari' id='source' onChange={(event) => handleChange('source', event)} />
-            <BaseInput text='tahun' id='year' onChange={(event) => handleChange('year', event)} />
+          <div>
+            <InputColumn idError='fileUploadError' text={textFileInput} type='file' onChange={handleInputFile} name='file_upload' id='fileUpload' required={isRequired} />
+            <InputColumn idError='fileNameError' className='mt-6' text='nama file' id='file_name' onChange={handleInput} name='file_name' value={fileName} required />
+            <InputColumn text='nomor surat' id='number' onChange={handleInput} name='number' value={number} />
+            <InputColumn text='sumber/dari' id='source' onChange={handleInput} name='source' value={source} />
           </div>
 
         </>}
 
         addButton={<>
-          <button className='btn' onClick={() => console.log(meta)}>cek data meta</button>
-          <button className={"btn hidden "+btnClass} id='btnCreate' onClick={createData}>Tambah</button>
-          <button className={"btn hidden "+btnClass} id='btnUpdate' onClick={updateData}>Perbarui</button>
+          <button className={"btn hidden "+btnClass} id='btnCreate' onClick={createData}>buat</button>
+          <button className={"btn hidden "+btnClass} id='btnUpdate' onClick={updateData}>simpan</button>
         </>}
       />
 
