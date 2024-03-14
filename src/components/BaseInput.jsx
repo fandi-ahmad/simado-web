@@ -1,4 +1,6 @@
-import React from 'react'
+// import React from 'react'
+import { React, useState, useEffect } from 'react'
+import { useGlobalState } from '../state/state'
 
 export const BaseInput = (props) => {
   return (
@@ -41,6 +43,23 @@ export const SelectInput = (props) => {
   )
 }
 
+export const SelectInputColumn = (props) => {
+  const required = () => {
+    if (props.required) {
+      return <span className='text-red-400'>*</span>
+    }
+  }
+  return (
+    <div className='mb-2 flex justify-between w-full'>
+      <p className="pt-4 mb-2 mr-2">{props.text}{required()}</p>
+      <select id={props.id} onChange={props.onChange} name={props.name} className={`${props.classInput || ''} select select-bordered w-96`}>
+        <option>-</option>
+        {props.option}
+      </select>
+    </div>
+  )
+}
+
 export const InputFile = (props) => {
   const required = () => {
     if (props.required) {
@@ -67,3 +86,76 @@ export const InputFile = (props) => {
     </div>
   )
 }
+
+
+export const SearchInput = (props) => {
+  /*
+    data: data array
+    onSelect: event onClick in data list
+  */
+
+  const [isOpen, setIsOpen] = useState(false);
+  // const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useGlobalState('searchTerm')
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handleInputChange = (event) => {
+    const term = event.target.value;
+    setSearchTerm(term);
+    // Filter the data based on search term
+    const results = props.data.filter((item) =>
+      item.name.toLowerCase().includes(term.toLowerCase()) ||
+      item.nisn.includes(term)
+    );
+    setSearchResults(results);
+    setIsOpen(true);
+  };
+
+  const handleItemClick = (item) => {
+    setSearchTerm(`${item.nisn} - ${item.name}`);
+    setIsOpen(false);
+    // Call onSelect prop to pass the selected item's id
+    props.onSelect(item.id);
+  };
+
+  const handleOutsideClick = (event) => {
+    if (event.target.closest('.search-input-container') === null) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    // Listen for outside clicks to close the dropdown
+    document.addEventListener('click', handleOutsideClick);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, []);
+
+  return (
+    <div className="relative search-input-container w-96">
+      <input
+        type="text"
+        id={props.id}
+        placeholder="Cari..."
+        value={searchTerm}
+        onChange={handleInputChange}
+        className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-500"
+      />
+      {isOpen && (
+        <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded border border-gray-200">
+          {searchResults.map((item, index) => (
+            <li
+              key={index}
+              onClick={() => handleItemClick(item)}
+              className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+            >
+              {item.nisn} - {item.name}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+

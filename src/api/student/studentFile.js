@@ -4,8 +4,8 @@ import { callApi } from "../utils"
 //   return callApi('get', `/student/file/`, data)
 // }
 
-export const GetAllStudentFile = (id_study_year = '', id_class_name = '') => {
-  return callApi('get', `/student/file?id_study_year=${id_study_year}&id_class_name=${id_class_name}`)
+export const GetAllStudentFile = (id_study_year = '', id_class_name = '', semester = '') => {
+  return callApi('get', `/student/file?id_study_year=${id_study_year}&id_class_name=${id_class_name}&semester=${semester}`)
 }
 
 export const CreateStudentFile = (data) => {

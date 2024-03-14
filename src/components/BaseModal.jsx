@@ -4,7 +4,7 @@ export const ModalForm = (props) => {
   const full = props.full || false
   return (
     <dialog id={props.id || 'modalForm'} className={`modal ${full ? 'px-12' : ''}`}>
-      <div className={`modal-box ${full ? 'min-w-fit' : ''}`}>
+      <div className={`modal-box h-fit ${full ? 'min-w-fit' : ''}`}>
         {props.fill}
         <div className="modal-action">
           <form method="dialog">
