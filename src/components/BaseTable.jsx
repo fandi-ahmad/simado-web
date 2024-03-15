@@ -17,7 +17,7 @@ export const TableData = (props) => {
 
 export const BaseTable = (props) => {
   return (
-    <div className="flex-none w-full max-w-full px-3">
+    <div className={`flex-none w-full max-w-full px-3 ${props.className}`}>
       <div className="relative flex flex-col min-w-0 mb-6 break-words bg-white border-0 border-transparent border-solid shadow-soft-xl rounded-2xl bg-clip-border">
         <div className="p-6 pb-0 mb-0 bg-white border-b-0 border-b-solid rounded-t-2xl border-b-transparent">
           <h6>{props.name}</h6>
@@ -49,5 +49,14 @@ export const ActionListData = (props) => {
         <span className='pb-1'>{props.text}</span>
       </a>
     </li>
+  )
+}
+
+export const ListDataForDetail = (props) => {
+  return (
+    <tr>
+      <td className='font-bold pb-2 pr-6'>{props.label}</td>
+      <td>{props.value}</td>
+    </tr>
   )
 }

@@ -2,7 +2,7 @@ import { React, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
-import { BaseTable, TableHead, TableData, ActionListData } from '../components/BaseTable'
+import { BaseTable, TableHead, TableData, ActionListData, ListDataForDetail } from '../components/BaseTable'
 import { Main, Container, ContainerRow } from '../components/BaseLayout'
 import { GetAllFile, CreateFile, DeleteFile, UpdateFile, GetAllFileByCategory } from '../api/file'
 import { downloadFile, getId, limitText } from '../function/baseFunction'
@@ -33,6 +33,8 @@ const Document = () => {
   })
   const params = useParams()
   const navigate = useNavigate()
+  const [createdAt, setCreatedAt] = useState('')
+  const [updatedAt, setUpdatedAt] = useState('')
 
 
   const getAllData = async () => {
@@ -117,6 +119,16 @@ const Document = () => {
   const openModalConfirm = (idSelected) => {
     setId(idSelected)
     getId('modalConfirm').showModal()
+  }
+
+  const openModalDetail = (dataParams) => {
+    getId('modalDetailData').showModal()
+    console.log(dataParams);
+    setCreatedAt(dataParams.createdAt)
+    setUpdatedAt(dataParams.updatedAt)
+    setFileName(dataParams.file_name)
+    setNumber(dataParams.number)
+    setSource(dataParams.source)
   }
 
   const createData = async () => {
@@ -214,7 +226,7 @@ const Document = () => {
           
           <ContainerRow className='-mx-3 relative'>
             {!data[0] ? <div className='w-full text-center text-2xl'>-- belum ada data --</div> : 
-              <BaseTable
+              <BaseTable className='pb-44'
                 thead={<>
                   <TableHead text='No' className='w-12' />
                   <TableHead text='Nama File' />
@@ -241,7 +253,7 @@ const Document = () => {
                             <ul tabIndex={10} className="dropdown-content z-10 absolute menu p-2 shadow bg-base-100 rounded-md w-52 border border-gray-300 font-medium">
                               <ActionListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
                               <ActionListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
-                              <ActionListData icon='fa-circle-info' text='Detail' />
+                              <ActionListData icon='fa-circle-info' text='Detail' onClick={() => openModalDetail(data)} />
                               <ActionListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
                               <ActionListData icon='fa-up-down-left-right' text='Pindahkan' onClick={() => openModalChangeCategory(data)} />
                               <ActionListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
@@ -260,6 +272,25 @@ const Document = () => {
 
         </Container>
       </Main>
+
+      {/* for detail data selected from table list */}
+      <ModalForm
+        id='modalDetailData'
+        fill={<>
+          <table>
+            <tbody>
+              <ListDataForDetail label='Nama file' value={fileName} />
+              <ListDataForDetail label='Nomor' value={number ? number : '-'} />
+              <ListDataForDetail label='Sumber' value={source ? source : '-'} />
+              <ListDataForDetail label='Diperbarui pada' value={updatedAt} />
+              <ListDataForDetail label='Dibuat pada' value={createdAt} />
+            </tbody>
+          </table>
+        </>}
+
+        idCloseBtn='closeBtnDetailData'
+        onClickCloseBtn={cleanUpFormInput}
+      />
 
       {/* modal for form input change category */}
       <ModalForm

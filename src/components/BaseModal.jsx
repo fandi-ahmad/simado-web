@@ -8,7 +8,7 @@ export const ModalForm = (props) => {
         {props.fill}
         <div className="modal-action">
           <form method="dialog">
-            <button className="btn" id={props.idCloseBtn || 'closeBtn'}>{props.closeText || 'Kembali'}</button>
+            <button className="btn" id={props.idCloseBtn || 'closeBtn'} onClick={props.onClickCloseBtn}>{props.closeText || 'Kembali'}</button>
           </form>
           {props.addButton}
         </div>
