@@ -4,8 +4,8 @@ export const GetAllFile = () => {
   return callApi('get', '/file')
 }
 
-export const GetAllFileByCategory = (id) => {
-  return callApi('get', '/file/category/'+id)
+export const GetAllFileByCategory = (id, page, limit, order, orderValue) => {
+  return callApi('get', `/file/category/${id}?page=${page}&limit=${limit}&order=${order}&order_value=${orderValue}`)
 }
 
 export const CreateFile = (data) => {
