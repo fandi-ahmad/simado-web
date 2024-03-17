@@ -2,24 +2,26 @@ import { React, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
-import { BaseTable, TableHead, TableData, ActionListData, ListDataForDetail } from '../components/BaseTable'
+import { BaseTable, TableHead, TableData, ListDataForDetail } from '../components/BaseTable'
 import { Main, Container, ContainerRow } from '../components/BaseLayout'
 import { GetAllFile, CreateFile, DeleteFile, UpdateFile, GetAllFileByCategory } from '../api/file'
-import { downloadFile, getId, limitText } from '../function/baseFunction'
+import { downloadFile, getId, limitText, formatDateFromISO } from '../function/baseFunction'
 import { ModalAlert, ModalForm } from '../components/BaseModal'
-import { InputColumn, SelectInput } from '../components/BaseInput'
+import { BaseInput, InputColumn, SelectInput } from '../components/BaseInput'
 import { BadgeFormatFile } from '../components/Badge'
-import { GetAllCategory, CreateCategory, DeleteCategory, UpdateCategory } from '../api/category'
+import { GetAllCategory } from '../api/category'
+import { BaseDropdownUl, DropdownListData } from '../components/Dropdown'
+import { BaseButton, ButtonPrimary } from '../components/BaseButton'
 
 
 const Document = () => {
-  const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const [data, setData] = useState([])
   const [dataCategory, setDataCategory] = useState([])
   const [id, setId] = useState('')
   const [textInfo, setTextInfo] = useState('')
   const [textAlert, setTextAlert] = useState('')
   const [textFileInput, setTextFileInput] = useState('upload file')
+  const [textBtnAction, setTextBtnAction] = useState('Buat')
   const [isRequired, setIsRequired] = useState(false)
   const [fileUpload, setFileUpload] = useState('')
   const [fileName, setFileName] = useState('')
@@ -36,17 +38,38 @@ const Document = () => {
   const [createdAt, setCreatedAt] = useState('')
   const [updatedAt, setUpdatedAt] = useState('')
 
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [orderName, setOrderName] = useState('updatedAt')
+  const [orderValue, setOrderValue] = useState('DESC')
+  
+  const [totalPage, setTotalPage] = useState(1)
+  const [isBtnPrevious, setIsBtnPrevious] = useState()
+  const [isBtnNext, setIsBtnNext] = useState()
+
+
+  const checkPaginationBtn = () => {
+    page == 1 ? setIsBtnPrevious(true) : setIsBtnPrevious(false)
+    page == totalPage ? setIsBtnNext(true) : setIsBtnNext(false)
+  }
 
   const getAllData = async () => {
     try {
-      const result = params.id ? await GetAllFileByCategory(params.id) : await GetAllFile();
-      if (result.data) setData(result.data); setCategoryName(result.category);
+      const result = params.id ? await GetAllFileByCategory(params.id, page, limit, orderName, orderValue) : await GetAllFile();
+      if (result.data) {
+        setData(result.data)
+        setCategoryName(result.category);
+
+        setTotalPage(result.total_page)
+      }
+
       if (result.status == 404) navigate('/document')
       if (params.id) setIdCategory(params.id)
     } catch (error) {}
   }
 
   const cleanUpFormInput = () => {
+    setId('')
     setFileUpload('')
     setFileName('')
     setNumber('')
@@ -99,8 +122,7 @@ const Document = () => {
       setTextInfo('edit file')
       setTextFileInput('upload file baru')
       setIsRequired(false)
-      getId('btnCreate').classList.add('hidden')
-      getId('btnUpdate').classList.remove('hidden')
+      setTextBtnAction('Simpan')
 
       selectedDataFile(dataParams)
     } else {
@@ -108,11 +130,9 @@ const Document = () => {
       setTextInfo('buat file baru')
       setTextFileInput('upload file')
       setIsRequired(true)
-      getId('btnCreate').classList.remove('hidden')
-      getId('btnUpdate').classList.add('hidden')
+      setTextBtnAction('Buat')
     }
 
-    // getId('errorMsg').classList.add('hidden')
     getId('modalForm').showModal()
   }
 
@@ -123,7 +143,6 @@ const Document = () => {
 
   const openModalDetail = (dataParams) => {
     getId('modalDetailData').showModal()
-    console.log(dataParams);
     setCreatedAt(dataParams.createdAt)
     setUpdatedAt(dataParams.updatedAt)
     setFileName(dataParams.file_name)
@@ -131,51 +150,38 @@ const Document = () => {
     setSource(dataParams.source)
   }
 
-  const createData = async () => {
+  const createOrUpdateData = async () => {
     try {
-
       if (fileName == '') getId('fileNameError').classList.remove('hidden')
-      if (fileUpload == '') getId('fileUploadError').classList.remove('hidden')
+      if (!id && fileUpload == '') getId('fileUploadError').classList.remove('hidden')
+      
+      const formData = new FormData();
+      formData.append('id_user', meta.current.id_user)
+      formData.append('id_category', idCategory)
+      formData.append('file_name', fileName)
+      formData.append('number', number)
+      formData.append('source', source)
+      formData.append('format', format)
+      formData.append('file_upload', fileUpload)
 
-      if (fileName && fileUpload) {
-        const formData = new FormData();
-        formData.append('id_user', meta.current.id_user)
-        formData.append('id_category', idCategory)
-        formData.append('file_name', fileName)
-        formData.append('number', number)
-        formData.append('source', source)
-        formData.append('format', format)
-        formData.append('file_upload', fileUpload)
-  
+      // create
+      if (!id && fileName && fileUpload) {
         getId('closeBtn').click()
         await CreateFile(formData)
-        setTimeout(() => { getAllData() }, 100)
       }
-    } catch (error) {
-      console.log(error, '<-- error create dokumen');
-    }
-  }
 
-  const updateData = async () => {
-    try {
-      if (fileName == '') getId('fileNameError').classList.remove('hidden')
-
-      if (fileName) {
-        const formData = new FormData();
+      // update
+      if (id && fileName) {
         formData.append('id', id)
-        formData.append('id_category', idCategory)
-        formData.append('file_name', fileName)
-        formData.append('number', number)
-        formData.append('source', source)
-        formData.append('format', format)
-        formData.append('file_upload', fileUpload)
-        
         getId('closeBtn').click()
         getId('closeBtnChangeCategory').click()
         await UpdateFile(formData)
-        setTimeout(() => { getAllData() }, 100)
       }
-    } catch (error) {}
+      
+      setTimeout(() => { getAllData() }, 100)
+    } catch (error) {
+      console.log(error, '<-- error create or update data');
+    }
   }
 
   const deleteData = async () => {
@@ -201,13 +207,26 @@ const Document = () => {
     getId('modalFormChangeCategory').showModal()
   }
 
+  const shortData = (order, value) => {
+    setOrderName(order)
+    setOrderValue(value)
+  }
+
+  useEffect(() => {
+    checkPaginationBtn()
+  }, [page, totalPage])
+
+  useEffect(() => {
+    setPage(1)
+  }, [limit])
+
   useEffect(() => {
     getDataCategory()
   }, [])
 
   useEffect(() => {
     getAllData()
-  }, [params.id])
+  }, [params.id, page, limit, orderName, orderValue])
 
   return (
     <>
@@ -220,17 +239,41 @@ const Document = () => {
 
         <Container>
 
-          <div className='flex justify-end mb-4'>
-            <button className={btnClass} onClick={()=>openModal()}>buat file baru <i className="fa-solid fa-plus"></i></button>
-          </div>
+          {params.id ?
+            <div className='flex justify-end mb-4'>
+              <ButtonPrimary text='Buat file baru' icon='fa-plus' onClick={() => openModal()} />
+            </div> : null
+          }
           
           <ContainerRow className='-mx-3 relative'>
-            {!data[0] ? <div className='w-full text-center text-2xl'>-- belum ada data --</div> : 
-              <BaseTable className='pb-44'
+            {!data[0] ? <div className='w-full text-center text-2xl'>-- Belum ada data --</div> : 
+              <BaseTable className='pb-24'
+                filter={<div className='flex flex-row justify-between'>
+                  <div>
+                    <BaseDropdownUl text='Tampilkan:' btnText={limit} btnClassName='bg-gray-300' className='w-20'>
+                      <DropdownListData text='10' onClick={() => setLimit(10)} />
+                      <DropdownListData text='25' onClick={() => setLimit(25)} />
+                      <DropdownListData text='50' onClick={() => setLimit(50)} />
+                      <DropdownListData text='100' onClick={() => setLimit(100)} />
+                    </BaseDropdownUl>
+
+                    <BaseDropdownUl text='Urutkan:' icon='fa-arrow-down-wide-short' btnClassName='bg-gray-300'>
+                      <DropdownListData icon={orderName == 'file_name' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Nama a - z' onClick={() => shortData('file_name', 'ASC')} />
+                      <DropdownListData icon={orderName == 'file_name' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Nama z - a' onClick={() => shortData('file_name', 'DESC')} />
+                      <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Tanggal terbaru' onClick={() => shortData('updatedAt', 'DESC')} />
+                      <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Tanggal terlama' onClick={() => shortData('updatedAt', 'ASC')} />
+                    </BaseDropdownUl>
+                  </div>
+
+                  <BaseInput type='search' placeholder='Cari...' />
+                 
+                </div>}
+
                 thead={<>
                   <TableHead text='No' className='w-12' />
                   <TableHead text='Nama File' />
-                  <TableHead text='' />
+                  <TableHead />
+                  <TableHead text='Diperbarui pada' />
                   <TableHead />
                   {!params.id ? <TableHead text='Kategori' className='pr-20' /> : null}
                   <TableHead />
@@ -241,30 +284,31 @@ const Document = () => {
                     <tr key={data.id}>
                       <TableData text={index+1} />
                       <TableData text={limitText(data.file_name)} />
-                      <TableData text={<BadgeFormatFile text={data.format} />} pl='pl-2' />
+                      <TableData text={<BadgeFormatFile text={data.format} />} pl='pl-2 pr-8' />
+                      <TableData text={formatDateFromISO(data.updatedAt)} />
                       <TableData text='' className='w-full' />
                       {!params.id ? <TableData text={data.category_name} /> : null}
                       <TableData text={
-                        <>
-                          <div className='dropdown dropdown-end mr-4'>
-                            <button tabIndex={1} role='button' className='btn btn-sm'>
-                              <i className="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                            <ul tabIndex={10} className="dropdown-content z-10 absolute menu p-2 shadow bg-base-100 rounded-md w-52 border border-gray-300 font-medium">
-                              <ActionListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
-                              <ActionListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
-                              <ActionListData icon='fa-circle-info' text='Detail' onClick={() => openModalDetail(data)} />
-                              <ActionListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
-                              <ActionListData icon='fa-up-down-left-right' text='Pindahkan' onClick={() => openModalChangeCategory(data)} />
-                              <ActionListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
-                            </ul>
-                          </div>
-                        </>
+                        <BaseDropdownUl icon='fa-ellipsis-vertical'>
+                          <DropdownListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
+                          <DropdownListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
+                          <DropdownListData icon='fa-circle-info' text='Detail' onClick={() => openModalDetail(data)} />
+                          <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
+                          <DropdownListData icon='fa-up-down-left-right' text='Pindahkan' onClick={() => openModalChangeCategory(data)} />
+                          <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
+                        </BaseDropdownUl>
                       } className='w-48' />
                     </tr>
                   ))}
-
-                  
+                  <tr>
+                    <TableData className='text-end' colSpan='10' text={
+                      <>
+                        <BaseButton className='btn-sm' icon='fa-caret-left' onClick={() => setPage(page - 1)} disabled={isBtnPrevious} />
+                        <span className='mx-2'>{page}/{totalPage}</span>
+                        <BaseButton className='btn-sm' icon='fa-caret-right' onClick={() => setPage(page + 1)} disabled={isBtnNext} />
+                      </>}
+                    />
+                  </tr>
                 </>}
               />
             }
@@ -306,7 +350,7 @@ const Document = () => {
 
         idCloseBtn='closeBtnChangeCategory'
         addButton={<>
-          <button className={"btn "+btnClass} onClick={updateData}>simpan</button>
+          <ButtonPrimary text='Simpan' onClick={createOrUpdateData} />
         </>}
       />
 
@@ -327,8 +371,7 @@ const Document = () => {
         </>}
 
         addButton={<>
-          <button className={"btn hidden "+btnClass} id='btnCreate' onClick={createData}>buat</button>
-          <button className={"btn hidden "+btnClass} id='btnUpdate' onClick={updateData}>simpan</button>
+          <ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />
         </>}
       />
 
@@ -338,7 +381,7 @@ const Document = () => {
         text='Yakin ingin menghapusnya??'
         idCloseBtn='closeBtnConfirm'
         closeText='Batal'
-        addButton={<button className={"btn "+btnClass} onClick={deleteData}>Ya, Hapus</button>}
+        addButton={<ButtonPrimary text='Ya, hapus' onClick={deleteData} />}
       />
 
       {/* alert */}

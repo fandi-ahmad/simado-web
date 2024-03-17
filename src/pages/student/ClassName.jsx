@@ -9,9 +9,9 @@ import { GetAllClass, CreateClass, DeleteClass, UpdateClass } from '../../api/st
 import { ModalAlert, ModalForm } from '../../components/BaseModal'
 import { BaseInput } from '../../components/BaseInput'
 import { getId } from '../../function/baseFunction'
+import { ButtonPrimary } from '../../components/BaseButton'
 
 const ClassName = () => {
-  const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const params = useParams()
   const navigate = useNavigate()
   const idStudyYear = params.id_study_year
@@ -121,7 +121,7 @@ const ClassName = () => {
         <Container>
 
           <div className='flex justify-end mb-4'>
-            <button className={'mr-2 '+btnClass} onClick={() => openModal()}>buat nama kelas baru <i className="fa-solid fa-plus"></i></button>
+            <ButtonPrimary text='buat nama kelas baru' icon='fa-plus' onClick={() => openModal()} className='mr-2' />
           </div>
 
           <div className='grid grid-cols-4'>
@@ -135,7 +135,6 @@ const ClassName = () => {
           </div>
 
         </Container>
-
       </Main>
 
       {/* modal for form input */}
@@ -150,9 +149,7 @@ const ClassName = () => {
 
         </>}
 
-        addButton={<>
-          <button className={"btn "+btnClass} onClick={createOrUpdateData}>{textBtnAction}</button>
-        </>}
+        addButton={<ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />}
       />
 
       {/* modal confirm */}
@@ -161,7 +158,7 @@ const ClassName = () => {
         text='Yakin ingin menghapusnya??'
         idCloseBtn='closeBtnConfirm'
         closeText='Batal'
-        addButton={<button className={"btn "+btnClass} onClick={deleteData}>Ya, Hapus</button>}
+        addButton={<ButtonPrimary text='ya, hapus' onClick={deleteData} />}
       />
     </>
   )

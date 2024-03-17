@@ -3,13 +3,14 @@ import Sidebar from '../../components/Sidebar'
 import { Container, ContainerRow, Main } from '../../components/BaseLayout'
 import Navbar from '../../components/Navbar'
 import { CreateStudent, DeleteStudent, GetAllStudent, UpdateStudent } from '../../api/student/student'
-import { ActionListData, BaseTable, TableData, TableHead } from '../../components/BaseTable'
+import {  BaseTable, TableData, TableHead } from '../../components/BaseTable'
 import { ModalAlert, ModalForm } from '../../components/BaseModal'
 import { getId } from '../../function/baseFunction'
-import { InputColumn } from '../../components/BaseInput'
+import { BaseInput, InputColumn } from '../../components/BaseInput'
+import { BaseButton, ButtonPrimary } from '../../components/BaseButton'
+import { BaseDropdownUl, DropdownListData } from '../../components/Dropdown'
 
 const Student = () => {
-  const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const [data, setData] = useState([])
   const [textInfo, setTextInfo] = useState('')
   const [textBtnAction, setTextBtnAction] = useState('buat')
@@ -19,10 +20,25 @@ const Student = () => {
   const [year, setYear] = useState('')
   const [id, setId] = useState('')
 
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [orderName, setOrderName] = useState('updatedAt')
+  const [orderValue, setOrderValue] = useState('DESC')
+
+  const [totalPage, setTotalPage] = useState(1)
+  const [isBtnPrevious, setIsBtnPrevious] = useState()
+  const [isBtnNext, setIsBtnNext] = useState()
+
+  const checkPaginationBtn = () => {
+    page == 1 ? setIsBtnPrevious(true) : setIsBtnPrevious(false)
+    page == totalPage ? setIsBtnNext(true) : setIsBtnNext(false)
+  }
+
   const getAllData = async () => {
     try {
-      const result = await GetAllStudent()
+      const result = await GetAllStudent(page, limit, orderName, orderValue)
       setData(result.data)
+      setTotalPage(result.total_page)
     } catch (error) {}
   }
   
@@ -122,12 +138,22 @@ const Student = () => {
     }
   }
 
+  const shortData = (order, value) => {
+    setOrderName(order)
+    setOrderValue(value)
+  }
 
+  useEffect(() => {
+    checkPaginationBtn()
+  }, [page, totalPage])
+
+  useEffect(() => {
+    setPage(1)
+  }, [limit])
 
   useEffect(() => {
     getAllData()
-  }, [])
-
+  }, [page, limit, orderName, orderValue])
 
   return (
     <>
@@ -141,12 +167,33 @@ const Student = () => {
         <Container>
 
           <div className='flex justify-end mb-4'>
-            <button className={btnClass} onClick={() => openModal()}>buat data siswa baru <i className="fa-solid fa-plus"></i></button>
+            <ButtonPrimary text='buat data siswa baru' icon='fa-plus' onClick={() => openModal()} />
           </div>
           
           <ContainerRow className='-mx-3 relative'>
-            {!data[0] ? <div className='w-full text-center text-2xl'>-- belum ada data --</div> : 
-              <BaseTable
+            {!data[0] ? <div className='w-full text-center text-2xl'>-- Belum ada data --</div> : 
+              <BaseTable className='pb-8'
+                filter={<div className='flex flex-row justify-between'>
+                  <div>
+                    <BaseDropdownUl text='Tampilkan:' btnText={limit} btnClassName='bg-gray-300' className='w-20'>
+                      <DropdownListData text='10' onClick={() => setLimit(10)} />
+                      <DropdownListData text='25' onClick={() => setLimit(25)} />
+                      <DropdownListData text='50' onClick={() => setLimit(50)} />
+                      <DropdownListData text='100' onClick={() => setLimit(100)} />
+                    </BaseDropdownUl>
+
+                    <BaseDropdownUl text='Urutkan:' icon='fa-arrow-down-wide-short' btnClassName='bg-gray-300'>
+                      <DropdownListData icon={orderName == 'name' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Nama a - z' onClick={() => shortData('name', 'ASC')} />
+                      <DropdownListData icon={orderName == 'name' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Nama z - a' onClick={() => shortData('name', 'DESC')} />
+                      <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Tanggal terbaru' onClick={() => shortData('updatedAt', 'DESC')} />
+                      <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Tanggal terlama' onClick={() => shortData('updatedAt', 'ASC')} />
+                    </BaseDropdownUl>
+                  </div>
+
+                  <BaseInput type='search' placeholder='Cari...' />
+                
+                </div>}
+              
                 thead={<>
                   <TableHead text='No' className='w-12' />
                   <TableHead text='NISN' />
@@ -165,20 +212,22 @@ const Student = () => {
                       <TableData text={data.year} />
                       <TableData className='w-full' />
                       <TableData text={
-                        <>
-                          <div className='dropdown dropdown-end mr-4'>
-                            <button tabIndex={1} role='button' className='btn btn-sm'>
-                              <i className="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                            <ul tabIndex={10} className="dropdown-content z-10 absolute menu p-2 shadow bg-base-100 rounded-md w-52 border border-gray-300 font-medium">
-                              <ActionListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
-                              <ActionListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
-                            </ul>
-                          </div>
-                        </>
+                        <BaseDropdownUl icon='fa-ellipsis-vertical'>
+                          <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
+                          <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
+                        </BaseDropdownUl>
                       } className='w-48' />
                     </tr>
                   ))}
+                  <tr>
+                    <TableData className='text-end' colSpan='10' text={
+                      <>
+                        <BaseButton className='btn-sm' icon='fa-caret-left' onClick={() => setPage(page - 1)} disabled={isBtnPrevious} />
+                        <span className='mx-2'>{page}/{totalPage}</span>
+                        <BaseButton className='btn-sm' icon='fa-caret-right' onClick={() => setPage(page + 1)} disabled={isBtnNext} />
+                      </>}
+                    />
+                  </tr>
                   
                 </>}
               />
@@ -198,9 +247,7 @@ const Student = () => {
           <InputColumn idError='yearError' text='Tahun masuk' name='year' onChange={handleInput} value={year} required />
         </>}
 
-        addButton={<>
-          <button className={"btn "+btnClass} onClick={createOrUpdateData}>{textBtnAction}</button>
-        </>}
+        addButton={<ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />}
       />
 
       {/* modal confirm */}
@@ -209,7 +256,7 @@ const Student = () => {
         text='Yakin ingin menghapusnya??'
         idCloseBtn='closeBtnConfirm'
         closeText='Batal'
-        addButton={<button className={"btn "+btnClass} onClick={deleteData}>Ya, Hapus</button>}
+        addButton={<ButtonPrimary text='ya, hapus' onClick={deleteData} />}
       />
 
       {/* alert */}
