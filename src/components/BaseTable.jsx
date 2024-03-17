@@ -8,7 +8,7 @@ export const TableHead = (props) => {
 
 export const TableData = (props) => {
   return (
-    <td className={`p-2 ${props.pl || 'pl-6'} bg-transparent border-b whitespace-nowrap shadow-transparent  ${props.className}`}>
+    <td colSpan={props.colSpan} rowSpan={props.rowSpan} className={`p-2 ${props.pl || 'pl-6'} bg-transparent border-b whitespace-nowrap shadow-transparent  ${props.className}`}>
       <span className='text-xs font-semibold leading-tight text-slate-400'>{props.text}</span>
     </td>
   )
@@ -23,6 +23,9 @@ export const BaseTable = (props) => {
           <h6>{props.name}</h6>
         </div>
         <div className="flex-auto px-0 pt-0 pb-2">
+          <div className="px-6">
+            {props.filter}
+          </div>
           <div className="p-0 ">
             <table className="items-center w-full mb-0 align-top text-slate-500">
               <thead className="align-bottom">
@@ -45,7 +48,7 @@ export const ActionListData = (props) => {
   return (
     <li onClick={props.onClick}>
       <a className='py-1'>
-        <i className={`fa-solid ${props.icon} w-4`}></i>
+        {props.icon ? <i className={`fa-solid ${props.icon} w-4`}></i> : null}
         <span className='pb-1'>{props.text}</span>
       </a>
     </li>

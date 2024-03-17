@@ -2,12 +2,14 @@
 import { React, useState, useEffect } from 'react'
 import { useGlobalState } from '../state/state'
 
+const inputClass = ' border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-500'
+
 export const BaseInput = (props) => {
   return (
     <div className={props.className} id={props.idField}>
       <div>
-        <p className="pt-4 mb-2">{props.text}</p>
-        <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} className="input input-bordered w-full" />
+        {props.text ? <p className="pt-4 mb-2">{props.text}</p> : null}
+        <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} placeholder={props.placeholder} className={"w-full"+inputClass} />
       </div>
       <p className={'text-red-400 text-sm hidden '+props.classError} id={props.idError}>{props.errorText || 'Input tidak boleh kosong'}</p>
     </div>
@@ -24,7 +26,7 @@ export const InputColumn = (props) => {
     <div className={'flex justify-between w-full mb-2 '+ props.className} id={props.idField}>
       <p className="pt-4 mb-2 mr-24">{props.text}{required()}</p>
       <div>
-        <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} className="input input-bordered w-96" />
+        <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} className={"w-96"+inputClass} />
         <p className={'text-red-400 text-sm hidden '+props.classError} id={props.idError}>{props.errorText || 'Input tidak boleh kosong'}</p>
       </div>
     </div>
@@ -35,7 +37,7 @@ export const SelectInput = (props) => {
   return (
     <div className='mb-2'>
       <p className="pt-4 mb-2">{props.text}</p>
-      <select id={props.id} onChange={props.onChange} name={props.name} className={`${props.classInput || ''} select select-bordered w-full`}>
+      <select id={props.id} onChange={props.onChange} name={props.name} className={`${props.classInput || ''} ${inputClass} cursor-pointer w-full`}>
         <option>-</option>
         {props.option}
       </select>
@@ -52,7 +54,7 @@ export const SelectInputColumn = (props) => {
   return (
     <div className='mb-2 flex justify-between w-full'>
       <p className="pt-4 mb-2 mr-2">{props.text}{required()}</p>
-      <select id={props.id} onChange={props.onChange} name={props.name} className={`${props.classInput || ''} select select-bordered w-96`}>
+      <select id={props.id} onChange={props.onChange} name={props.name} className={`${props.classInput || ''} ${inputClass} cursor-pointer w-96`}>
         <option>-</option>
         {props.option}
       </select>
@@ -135,13 +137,14 @@ export const SearchInput = (props) => {
   return (
     <div className="relative search-input-container w-96">
       <input
-        type="text"
+        type="search"
         id={props.id}
         placeholder="Cari..."
         value={searchTerm}
         onChange={handleInputChange}
         className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-500"
       />
+
       {isOpen && (
         <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded border border-gray-200">
           {searchResults.map((item, index) => (
@@ -155,6 +158,8 @@ export const SearchInput = (props) => {
           ))}
         </ul>
       )}
+
+      <p className={'text-red-400 text-sm hidden '+props.classError} id={props.idError}>{props.errorText || 'Input tidak boleh kosong'}</p>
     </div>
   );
 };

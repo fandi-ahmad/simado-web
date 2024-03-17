@@ -9,5 +9,5 @@ export const Container = (props) => {
 }
 
 export const ContainerRow = (props) => {
-  return <div className={'flex flex-wrap ' + props.className}>{props.children}</div>
+  return <div className={`flex flex-wrap ${props.className}`}>{props.children}</div>
 }
