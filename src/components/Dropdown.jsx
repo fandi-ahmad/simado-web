@@ -1,10 +1,10 @@
 export const BaseDropdownUl = (props) => {
   return (
-    <div className='dropdown dropdown-end mr-4'>
+    <div className='dropdown dropdown-end'>
       
       {props.text ? <span className='mr-2'>{props.text}</span> : null}
 
-      <button tabIndex={1} role='button' className={`btn btn-sm ${props.btnClassName}`}>
+      <button tabIndex={1} role='button' className={`btn btn-sm text-gray-600  ${props.btnClassName}`}>
         {props.btnText}
         {props.icon ? <i className={`fa-solid ${props.icon}`}></i> : null}
       </button>
