@@ -34,6 +34,10 @@ export const RoutesTemplate = () => {
       element: <Student/>
     },
     {
+      path: '/data/student/:id_entry_year',
+      element: <Student/>
+    },
+    {
       path: '/rapor/study-year',
       element: <StudyYear/>
     },

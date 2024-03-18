@@ -3,14 +3,19 @@ import Sidebar from '../../components/Sidebar'
 import { Container, ContainerRow, Main } from '../../components/BaseLayout'
 import Navbar from '../../components/Navbar'
 import { CreateStudent, DeleteStudent, GetAllStudent, UpdateStudent } from '../../api/student/student'
-import {  BaseTable, TableData, TableHead } from '../../components/BaseTable'
+import { BaseTable, TableData, TableHead } from '../../components/BaseTable'
 import { ModalAlert, ModalForm } from '../../components/BaseModal'
 import { getId } from '../../function/baseFunction'
 import { BaseInput, InputColumn } from '../../components/BaseInput'
-import { BaseButton, ButtonPrimary } from '../../components/BaseButton'
+import { BaseButton, ButtonPrimary, ButtonDropdown } from '../../components/BaseButton'
 import { BaseDropdownUl, DropdownListData } from '../../components/Dropdown'
+import { GetAllEntryYear, CreateEntryYear, DeleteEntryYear, UpdateEntryYear} from '../../api/student/entryYear'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const Student = () => {
+  const params = useParams()
+  const navigate = useNavigate()
+  const idEntryYearFromParam = params.id_entry_year
   const [data, setData] = useState([])
   const [textInfo, setTextInfo] = useState('')
   const [textBtnAction, setTextBtnAction] = useState('buat')
@@ -24,21 +29,36 @@ const Student = () => {
   const [limit, setLimit] = useState(10)
   const [orderName, setOrderName] = useState('updatedAt')
   const [orderValue, setOrderValue] = useState('DESC')
+  const [search, setSearch] = useState('')
 
   const [totalPage, setTotalPage] = useState(1)
   const [isBtnPrevious, setIsBtnPrevious] = useState()
   const [isBtnNext, setIsBtnNext] = useState()
 
+  const [dataEntryYear, setDataEntryYear] = useState([])
+  const [entryYear, setEntryYear] = useState('')                      // use for create/update 
+  const [idEntryYear, setIdEntryYear] = useState('')                  // use for update/delete
+  const [idEntryYearSelected, setIdEntryYearSelected] = useState('')  // use for create/update student
+
   const checkPaginationBtn = () => {
     page == 1 ? setIsBtnPrevious(true) : setIsBtnPrevious(false)
-    page == totalPage ? setIsBtnNext(true) : setIsBtnNext(false)
+    page >= totalPage ? setIsBtnNext(true) : setIsBtnNext(false)
+  }
+
+  const getAllDataEntryYear = async () => {
+    try {
+      const result = await GetAllEntryYear()
+      if (result.data) setDataEntryYear(result.data)
+    } catch (error) {}
   }
 
   const getAllData = async () => {
     try {
-      const result = await GetAllStudent(page, limit, orderName, orderValue)
-      setData(result.data)
-      setTotalPage(result.total_page)
+      const result = await GetAllStudent(page, limit, orderName, orderValue, idEntryYearFromParam)
+      if (result.data) {
+        setData(result.data)
+        setTotalPage(result.total_page)
+      }
     } catch (error) {}
   }
   
@@ -48,6 +68,7 @@ const Student = () => {
       case 'nisn': setNisn(value); break;
       case 'studentName': setStudentName(value); break;
       case 'year': setYear(value); break;
+      case 'entryYear': setEntryYear(value); break;
       default: break;
     }
   };
@@ -57,39 +78,47 @@ const Student = () => {
     setNisn('')
     setStudentName('')
     setYear('')
+    setIdEntryYear('')
+    setEntryYear('')
     getId('nisnError').classList.add('hidden')
     getId('studentNameError').classList.add('hidden')
-    getId('yearError').classList.add('hidden')
+    getId('entryYearError').classList.add('hidden')
   }  
 
   const openModal = (dataParams = '') => {
-    getId('modalForm').showModal()
-    cleanUpFormInput()
-
-    if (dataParams.id) {
-      // for edit
-      setTextBtnAction('simpan')
-      setTextInfo('Edit data siswa')
-
-      setId(dataParams.id)
-      setNisn(dataParams.nisn)
-      setStudentName(dataParams.name)
-      setYear(dataParams.year)
+    if (!dataEntryYear[0]) {
+      setTextAlert('Buat masuk terlebih dahulu!')
+      getId('modalAlert').showModal()
     } else {
-      // for create new
-      setTextBtnAction('buat')
-      setTextInfo('Buat data siswa baru')
+      getId('modalForm').showModal()
+      cleanUpFormInput()
+  
+      if (dataParams.id) {
+        // for edit
+        setTextBtnAction('simpan')
+        setTextInfo('Edit data siswa')
+  
+        setId(dataParams.id)
+        setNisn(dataParams.nisn)
+        setStudentName(dataParams.name)
+        setYear(dataParams.year)
+      } else {
+        // for create new
+        setTextBtnAction('buat')
+        setTextInfo('Buat data siswa baru')
+      }
     }
+
   }
 
-  const openModalConfirm = (idSelected) => {
-    setId(idSelected)
+  const openModalConfirm = (idSelected, isIdStudent = false) => {
+    isIdStudent ? setId(idSelected) : setIdEntryYear(idSelected)
     getId('modalConfirm').showModal()
   }
 
-  const validateNisn = (condition) => {
-    if (condition == 406) {
-      setTextAlert('NISN sudah digunakan!')
+  const validateResult = (result) => {
+    if (result.status != 200) {
+      setTextAlert(result.message)
       getId('modalAlert').showModal()
     } else {
       getId('closeBtn').click()
@@ -100,27 +129,26 @@ const Student = () => {
     try {
       if (nisn == '') getId('nisnError').classList.remove('hidden')
       if (studentName == '') getId('studentNameError').classList.remove('hidden')
-      if (year == '') getId('yearError').classList.remove('hidden')
 
       // create
-      if (!id && nisn && studentName && year) {
+      if (!id && nisn && studentName) {
         const result = await CreateStudent({
           nisn: nisn,
           name: studentName,
-          year: year
+          id_entry_year: idEntryYearFromParam
         })
-        validateNisn(result.status)
+        validateResult(result)
       }
 
       // update
-      if (id && nisn && studentName && year) {
+      if (id && nisn && studentName) {
         const result = await UpdateStudent({
           id: id,
           nisn: nisn,
           name: studentName,
-          year: year
+          id_entry_year: idEntryYearFromParam
         })
-        validateNisn(result.status)
+        validateResult(result)
       }
       
       setTimeout(() => { getAllData() }, 100)
@@ -130,8 +158,12 @@ const Student = () => {
   const deleteData = async () => {
     try {
       getId('closeBtnConfirm').click()
-      await DeleteStudent(id)
+
+      if (id) await DeleteStudent(id)
+      if (idEntryYear) await DeleteEntryYear(idEntryYear)
+      
       getAllData()
+      getAllDataEntryYear()
     } catch (error) {
       setTextAlert('Terjadi kesalahan!')
       getId('modalAlert').showModal()
@@ -153,7 +185,54 @@ const Student = () => {
 
   useEffect(() => {
     getAllData()
-  }, [page, limit, orderName, orderValue])
+  }, [page, limit, orderName, orderValue, idEntryYearFromParam])
+
+  const openModalEntryYear = (dataParams = '') => {
+    getId('modalFormEntryYear').showModal()
+    cleanUpFormInput()
+
+    if (dataParams.id) {
+      // for edit
+      setTextBtnAction('simpan')
+      setTextInfo('Edit tahun masuk')
+
+      setIdEntryYear(dataParams.id)
+      setEntryYear(dataParams.year)
+    } else {
+      // for create new
+      setTextBtnAction('buat')
+      setTextInfo('Buat tahun masuk')
+    }
+  }
+
+  const createOrUpdateEntryYear = async () => {
+    try {
+      if (entryYear == '') getId('entryYearError').classList.remove('hidden')
+    
+      // create
+      if (!idEntryYear && entryYear) {
+        getId('closeBtnEntryYear').click()
+        await CreateEntryYear({
+          year: entryYear
+        })
+      }
+
+      // update
+      if (idEntryYear && entryYear) {
+        getId('closeBtnEntryYear').click()
+         await UpdateEntryYear({
+          id: idEntryYear,
+          year: entryYear
+        })
+      }
+
+      setTimeout(() => { getAllDataEntryYear() }, 100)
+    } catch (error) {}
+  }
+
+  useEffect(() => {
+    getAllDataEntryYear()
+  }, [])
 
   return (
     <>
@@ -171,11 +250,34 @@ const Student = () => {
           </div>
           
           <ContainerRow className='-mx-3 relative'>
-            {!data[0] ? <div className='w-full text-center text-2xl'>-- Belum ada data --</div> : 
+            <span className='ml-3'>Tahun masuk siswa:</span>
+            <div className='mx-3 pb-2 w-full grid' style={{gridTemplateColumns: 'repeat(14, minmax(0, 1fr))'}}>
+              
+              { dataEntryYear[0] ? dataEntryYear.map((data) => (
+                <ButtonDropdown key={data.id} text={data.year}
+                  className={`mr-2 ${idEntryYearFromParam == data.id ? 'bg-gray-400' : 'bg-white'}`}
+                  textClassName={idEntryYearFromParam == data.id ? 'text-white' : null}
+                  onClick={() => navigate('/data/student/'+data.id)}
+                >
+                  <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModalEntryYear(data)} />
+                  <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
+                </ButtonDropdown>
+              )) : null }
+
+              <BaseButton
+                onClick={() => openModalEntryYear()}
+                tooltip='Buat tahun masuk' 
+                text={<i className="fa-solid fa-plus"></i>} 
+                className='btn-sm mr-2 mt-2' 
+                bgClassName='bg-white hover:bg-gray-200'
+              />
+
+            </div>
+            { !idEntryYearFromParam ? <span className='text-center text-xl w-full'>Pilih tahun masuk terlebih dahulu!</span> : 
               <BaseTable className='pb-8'
                 filter={<div className='flex flex-row justify-between'>
                   <div>
-                    <BaseDropdownUl text='Tampilkan:' btnText={limit} btnClassName='bg-gray-300' className='w-20'>
+                    <BaseDropdownUl text='Tampilkan:' btnText={limit} btnClassName='bg-gray-300 mr-4' className='w-20'>
                       <DropdownListData text='10' onClick={() => setLimit(10)} />
                       <DropdownListData text='25' onClick={() => setLimit(25)} />
                       <DropdownListData text='50' onClick={() => setLimit(50)} />
@@ -194,31 +296,30 @@ const Student = () => {
                 
                 </div>}
               
-                thead={<>
+                thead={ !data[0] ? <TableHead text='-- Belum ada data --' className='text-center' /> :
+                <>
                   <TableHead text='No' className='w-12' />
                   <TableHead text='NISN' />
                   <TableHead text='Nama Siswa' />
-                  <TableHead text='Tahun masuk' />
                   <TableHead />
                   <TableHead />
                 </>}
 
                 tbody={<>
-                  {data.map((data, index) => (
+                  { data[0] ? data.map((data, index) => (
                     <tr key={data.id}>
                       <TableData text={index+1} />
                       <TableData text={data.nisn} />
                       <TableData text={data.name} className='capitalize' />
-                      <TableData text={data.year} />
                       <TableData className='w-full' />
                       <TableData text={
                         <BaseDropdownUl icon='fa-ellipsis-vertical'>
                           <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
-                          <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
+                          <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id, true)} />
                         </BaseDropdownUl>
                       } className='w-48' />
                     </tr>
-                  ))}
+                  )) : null}
                   <tr>
                     <TableData className='text-end' colSpan='10' text={
                       <>
@@ -237,6 +338,18 @@ const Student = () => {
         </Container>
       </Main>
 
+       {/* modal form for input */}
+       <ModalForm
+        id='modalFormEntryYear'
+        fill={<>
+          <h3 className="font-bold text-lg capitalize">{textInfo}</h3>
+          <BaseInput idError='entryYearError' name='entryYear' value={entryYear} onChange={handleInput} required />
+        </>}
+
+        idCloseBtn='closeBtnEntryYear'
+        addButton={<ButtonPrimary text={textBtnAction} onClick={createOrUpdateEntryYear} />}
+      />
+
       {/* modal form for input */}
       <ModalForm
         full={true}
@@ -244,7 +357,6 @@ const Student = () => {
           <h3 className="font-bold text-lg capitalize">{textInfo}</h3>
           <InputColumn idError='nisnError' text='NISN' name='nisn' onChange={handleInput} value={nisn} required />
           <InputColumn idError='studentNameError' text='Nama siswa' name='studentName' onChange={handleInput} value={studentName} required />
-          <InputColumn idError='yearError' text='Tahun masuk' name='year' onChange={handleInput} value={year} required />
         </>}
 
         addButton={<ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />}

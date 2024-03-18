@@ -31,7 +31,7 @@ const Document = () => {
   const [idCategory, setIdCategory] = useState('')
   const [categoryName, setCategoryName] = useState('')
   const meta = useRef({
-    id_user: 'd2321c4d-392e-4625-84df-545a3963a589' //temporary
+    id_user: '81ba78db-8c01-4ce4-ad1d-d656320fada9' //temporary
   })
   const params = useParams()
   const navigate = useNavigate()
@@ -248,75 +248,73 @@ const Document = () => {
           }
           
           <ContainerRow className='-mx-3 relative'>
-            {/* {!data[0] ? <div className='w-full text-center text-2xl'>-- Belum ada data --</div> :  */}
-              <BaseTable className='pb-24'
-                filter={<div className='flex flex-row justify-between'>
-                  <div>
-                    <BaseDropdownUl text='Tampilkan:' btnText={limit} btnClassName='bg-gray-300' className='w-20'>
-                      <DropdownListData text='10' onClick={() => setLimit(10)} />
-                      <DropdownListData text='25' onClick={() => setLimit(25)} />
-                      <DropdownListData text='50' onClick={() => setLimit(50)} />
-                      <DropdownListData text='100' onClick={() => setLimit(100)} />
-                    </BaseDropdownUl>
+            <BaseTable className='pb-24'
+              filter={<div className='flex flex-row justify-between'>
+                <div>
+                  <BaseDropdownUl text='Tampilkan:' btnText={limit} btnClassName='bg-gray-300 mr-4' className='w-20'>
+                    <DropdownListData text='10' onClick={() => setLimit(10)} />
+                    <DropdownListData text='25' onClick={() => setLimit(25)} />
+                    <DropdownListData text='50' onClick={() => setLimit(50)} />
+                    <DropdownListData text='100' onClick={() => setLimit(100)} />
+                  </BaseDropdownUl>
 
-                    <BaseDropdownUl text='Urutkan:' icon='fa-arrow-down-wide-short' btnClassName='bg-gray-300'>
-                      <DropdownListData icon={orderName == 'file_name' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Nama a - z' onClick={() => shortData('file_name', 'ASC')} />
-                      <DropdownListData icon={orderName == 'file_name' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Nama z - a' onClick={() => shortData('file_name', 'DESC')} />
-                      <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Tanggal terbaru' onClick={() => shortData('updatedAt', 'DESC')} />
-                      <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Tanggal terlama' onClick={() => shortData('updatedAt', 'ASC')} />
-                    </BaseDropdownUl>
-                  </div>
+                  <BaseDropdownUl text='Urutkan:' icon='fa-arrow-down-wide-short' btnClassName='bg-gray-300'>
+                    <DropdownListData icon={orderName == 'file_name' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Nama a - z' onClick={() => shortData('file_name', 'ASC')} />
+                    <DropdownListData icon={orderName == 'file_name' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Nama z - a' onClick={() => shortData('file_name', 'DESC')} />
+                    <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Tanggal terbaru' onClick={() => shortData('updatedAt', 'DESC')} />
+                    <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Tanggal terlama' onClick={() => shortData('updatedAt', 'ASC')} />
+                  </BaseDropdownUl>
+                </div>
 
-                  <BaseInput type='search' name='search' value={search} onChange={handleInput} placeholder='Cari...' />
-                 
-                </div>}
+                <BaseInput type='search' name='search' value={search} onChange={handleInput} placeholder='Cari...' />
+                
+              </div>}
 
-                thead={ !data[0] ? <TableHead text='-- Belum ada data --' className='text-center' /> :
-                <>
-                  <TableHead text='No' className='w-12' />
-                  <TableHead text='Nama File' />
-                  <TableHead />
-                  <TableHead text='Sumber/dari' />
-                  <TableHead text='Diperbarui pada' />
-                  <TableHead />
-                  {!params.id ? <TableHead text='Kategori' className='pr-20' /> : null}
-                  <TableHead />
-                </>}
+              thead={ !data[0] ? <TableHead text='-- Belum ada data --' className='text-center' /> :
+              <>
+                <TableHead text='No' className='w-12' />
+                <TableHead text='Nama File' />
+                <TableHead />
+                <TableHead text='Sumber/dari' />
+                <TableHead text='Diperbarui pada' />
+                <TableHead />
+                {!params.id ? <TableHead text='Kategori' className='pr-20' /> : null}
+                <TableHead />
+              </>}
 
-                tbody={<>
-                  { data[0] ? data.map((data, index) => (
-                    <tr key={data.id}>
-                      <TableData text={index+1} />
-                      <TableData text={limitText(data.file_name)} />
-                      <TableData text={<BadgeFormatFile text={data.format} />} pl='pl-2' />
-                      <TableData text={data.source ? limitText(data.source, 20) : '-'} />
-                      <TableData text={formatDateAndTime(data.updatedAt)} />
-                      <TableData text='' className='w-full' />
-                      {!params.id ? <TableData text={data.category_name} /> : null}
-                      <TableData text={
-                        <BaseDropdownUl icon='fa-ellipsis-vertical'>
-                          <DropdownListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
-                          <DropdownListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
-                          <DropdownListData icon='fa-circle-info' text='Detail' onClick={() => openModalDetail(data)} />
-                          <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
-                          <DropdownListData icon='fa-up-down-left-right' text='Pindahkan' onClick={() => openModalChangeCategory(data)} />
-                          <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
-                        </BaseDropdownUl>
-                      } className='w-48' />
-                    </tr>
-                  )) : null}
-                  <tr>
-                    <TableData className='text-end' colSpan='10' text={
-                      <>
-                        <BaseButton className='btn-sm' icon='fa-caret-left' onClick={() => setPage(page - 1)} disabled={isBtnPrevious} />
-                        <span className='mx-2'>{page}/{totalPage}</span>
-                        <BaseButton className='btn-sm' icon='fa-caret-right' onClick={() => setPage(page + 1)} disabled={isBtnNext} />
-                      </>}
-                    />
+              tbody={<>
+                { data[0] ? data.map((data, index) => (
+                  <tr key={data.id}>
+                    <TableData text={index+1} />
+                    <TableData text={limitText(data.file_name)} />
+                    <TableData text={<BadgeFormatFile text={data.format} />} pl='pl-2' />
+                    <TableData text={data.source ? limitText(data.source, 20) : '-'} />
+                    <TableData text={formatDateAndTime(data.updatedAt)} />
+                    <TableData text='' className='w-full' />
+                    {!params.id ? <TableData text={data.category_name} /> : null}
+                    <TableData text={
+                      <BaseDropdownUl icon='fa-ellipsis-vertical'>
+                        <DropdownListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
+                        <DropdownListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
+                        <DropdownListData icon='fa-circle-info' text='Detail' onClick={() => openModalDetail(data)} />
+                        <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
+                        <DropdownListData icon='fa-up-down-left-right' text='Pindahkan' onClick={() => openModalChangeCategory(data)} />
+                        <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
+                      </BaseDropdownUl>
+                    } className='w-48' />
                   </tr>
-                </>}
-              />
-            {/* } */}
+                )) : null}
+                <tr>
+                  <TableData className='text-end' colSpan='10' text={
+                    <>
+                      <BaseButton className='btn-sm' icon='fa-caret-left' onClick={() => setPage(page - 1)} disabled={isBtnPrevious} />
+                      <span className='mx-2'>{page}/{totalPage}</span>
+                      <BaseButton className='btn-sm' icon='fa-caret-right' onClick={() => setPage(page + 1)} disabled={isBtnNext} />
+                    </>}
+                  />
+                </tr>
+              </>}
+            />
           </ContainerRow>
 
         </Container>
@@ -346,7 +344,7 @@ const Document = () => {
         id='modalFormChangeCategory'
         fill={<>
           <h3 className="font-semibold text-lg capitalize">Pindahkan "{fileName}"</h3>
-          <SelectInput text={'lokasi saat ini: '+ categoryName} id='category' name='category' onChange={handleInput} option={
+          <SelectInput text={<>Lokasi saat ini: <span className='font-semibold'>{categoryName}</span></>} id='category' name='category' onChange={handleInput} option={
             dataCategory.map((data) => (
               <option key={data.id} value={data.id}>{data.name}</option>
             ))
