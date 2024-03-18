@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar'
 import { BaseTable, TableHead, TableData, ListDataForDetail } from '../components/BaseTable'
 import { Main, Container, ContainerRow } from '../components/BaseLayout'
 import { GetAllFile, CreateFile, DeleteFile, UpdateFile, GetAllFileByCategory } from '../api/file'
-import { downloadFile, getId, limitText, formatDateFromISO } from '../function/baseFunction'
+import { downloadFile, getId, limitText, formatDateAndTime } from '../function/baseFunction'
 import { ModalAlert, ModalForm } from '../components/BaseModal'
 import { BaseInput, InputColumn, SelectInput } from '../components/BaseInput'
 import { BadgeFormatFile } from '../components/Badge'
@@ -42,6 +42,7 @@ const Document = () => {
   const [limit, setLimit] = useState(10)
   const [orderName, setOrderName] = useState('updatedAt')
   const [orderValue, setOrderValue] = useState('DESC')
+  const [search, setSearch] = useState('')
   
   const [totalPage, setTotalPage] = useState(1)
   const [isBtnPrevious, setIsBtnPrevious] = useState()
@@ -50,12 +51,12 @@ const Document = () => {
 
   const checkPaginationBtn = () => {
     page == 1 ? setIsBtnPrevious(true) : setIsBtnPrevious(false)
-    page == totalPage ? setIsBtnNext(true) : setIsBtnNext(false)
+    page >= totalPage ? setIsBtnNext(true) : setIsBtnNext(false)
   }
 
   const getAllData = async () => {
     try {
-      const result = params.id ? await GetAllFileByCategory(params.id, page, limit, orderName, orderValue) : await GetAllFile();
+      const result = params.id ? await GetAllFileByCategory(params.id, page, limit, orderName, orderValue, search) : await GetAllFile(page, limit, orderName, orderValue, search);
       if (result.data) {
         setData(result.data)
         setCategoryName(result.category);
@@ -87,6 +88,7 @@ const Document = () => {
       case 'source': setSource(value); break;
       case 'number': setNumber(value); break;
       case 'category': setIdCategory(value); break;
+      case 'search': setSearch(value); break;
       default: break;
     }
   };
@@ -226,7 +228,7 @@ const Document = () => {
 
   useEffect(() => {
     getAllData()
-  }, [params.id, page, limit, orderName, orderValue])
+  }, [params.id, page, limit, orderName, orderValue, search])
 
   return (
     <>
@@ -246,7 +248,7 @@ const Document = () => {
           }
           
           <ContainerRow className='-mx-3 relative'>
-            {!data[0] ? <div className='w-full text-center text-2xl'>-- Belum ada data --</div> : 
+            {/* {!data[0] ? <div className='w-full text-center text-2xl'>-- Belum ada data --</div> :  */}
               <BaseTable className='pb-24'
                 filter={<div className='flex flex-row justify-between'>
                   <div>
@@ -265,14 +267,16 @@ const Document = () => {
                     </BaseDropdownUl>
                   </div>
 
-                  <BaseInput type='search' placeholder='Cari...' />
+                  <BaseInput type='search' name='search' value={search} onChange={handleInput} placeholder='Cari...' />
                  
                 </div>}
 
-                thead={<>
+                thead={ !data[0] ? <TableHead text='-- Belum ada data --' className='text-center' /> :
+                <>
                   <TableHead text='No' className='w-12' />
                   <TableHead text='Nama File' />
                   <TableHead />
+                  <TableHead text='Sumber/dari' />
                   <TableHead text='Diperbarui pada' />
                   <TableHead />
                   {!params.id ? <TableHead text='Kategori' className='pr-20' /> : null}
@@ -280,12 +284,13 @@ const Document = () => {
                 </>}
 
                 tbody={<>
-                  {data.map((data, index) => (
+                  { data[0] ? data.map((data, index) => (
                     <tr key={data.id}>
                       <TableData text={index+1} />
                       <TableData text={limitText(data.file_name)} />
-                      <TableData text={<BadgeFormatFile text={data.format} />} pl='pl-2 pr-8' />
-                      <TableData text={formatDateFromISO(data.updatedAt)} />
+                      <TableData text={<BadgeFormatFile text={data.format} />} pl='pl-2' />
+                      <TableData text={data.source ? limitText(data.source, 20) : '-'} />
+                      <TableData text={formatDateAndTime(data.updatedAt)} />
                       <TableData text='' className='w-full' />
                       {!params.id ? <TableData text={data.category_name} /> : null}
                       <TableData text={
@@ -299,7 +304,7 @@ const Document = () => {
                         </BaseDropdownUl>
                       } className='w-48' />
                     </tr>
-                  ))}
+                  )) : null}
                   <tr>
                     <TableData className='text-end' colSpan='10' text={
                       <>
@@ -311,7 +316,7 @@ const Document = () => {
                   </tr>
                 </>}
               />
-            }
+            {/* } */}
           </ContainerRow>
 
         </Container>
@@ -326,8 +331,8 @@ const Document = () => {
               <ListDataForDetail label='Nama file' value={fileName} />
               <ListDataForDetail label='Nomor' value={number ? number : '-'} />
               <ListDataForDetail label='Sumber' value={source ? source : '-'} />
-              <ListDataForDetail label='Diperbarui pada' value={updatedAt} />
-              <ListDataForDetail label='Dibuat pada' value={createdAt} />
+              <ListDataForDetail label='Diperbarui pada' value={formatDateAndTime(updatedAt)} />
+              <ListDataForDetail label='Dibuat pada' value={formatDateAndTime(createdAt)} />
             </tbody>
           </table>
         </>}

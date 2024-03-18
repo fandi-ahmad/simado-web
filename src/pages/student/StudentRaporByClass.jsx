@@ -68,7 +68,7 @@ const StudentRaporByClass = () => {
 
   const getAllDataStudent = async () => {
     try {
-      const result = await GetAllStudent()
+      const result = await GetAllStudent(page, limit, 'name', 'ASC')
       setDataStudent(result.data)
     } catch (error) {}
   }
@@ -266,7 +266,7 @@ const StudentRaporByClass = () => {
           </div>
 
           <ContainerRow className='-mx-3 relative'>
-            <div role="tablist" className="tabs tabs-lifted w-full">
+            <div role="tablist" className="tabs tabs-lifted w-full pb-28">
               <input type="radio" name="semester" id='1' onChange={(e) => setSemester(e.target.id)} role="tab" className="tab" aria-label='Semester 1' />
               <div role="tabpanel" className="tab-content bg-white border-base-300 rounded-box pt-6 w-full">
                 {dataStudentFileInTable()}
