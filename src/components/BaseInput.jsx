@@ -9,7 +9,7 @@ export const BaseInput = (props) => {
     <div className={props.className} id={props.idField}>
       <div>
         {props.text ? <p className="pt-4 mb-2">{props.text}</p> : null}
-        <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} placeholder={props.placeholder} className={"w-full"+inputClass} />
+        <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} placeholder={props.placeholder} className={"w-full"+inputClass} autoComplete='off' />
       </div>
       <p className={'text-red-400 text-sm hidden '+props.classError} id={props.idError}>{props.errorText || 'Input tidak boleh kosong'}</p>
     </div>
@@ -26,7 +26,7 @@ export const InputColumn = (props) => {
     <div className={'flex justify-between w-full mb-2 '+ props.className} id={props.idField}>
       <p className="pt-4 mb-2 mr-24">{props.text}{required()}</p>
       <div>
-        <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} className={"w-96"+inputClass} />
+        <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} className={"w-96"+inputClass} autoComplete="off" />
         <p className={'text-red-400 text-sm hidden '+props.classError} id={props.idError}>{props.errorText || 'Input tidak boleh kosong'}</p>
       </div>
     </div>
