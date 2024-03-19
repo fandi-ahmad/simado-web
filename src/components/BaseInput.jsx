@@ -97,7 +97,6 @@ export const SearchInput = (props) => {
   */
 
   const [isOpen, setIsOpen] = useState(false);
-  // const [searchTerm, setSearchTerm] = useState('');
   const [searchTerm, setSearchTerm] = useGlobalState('searchTerm')
   const [searchResults, setSearchResults] = useState([]);
 
@@ -135,18 +134,22 @@ export const SearchInput = (props) => {
   }, []);
 
   return (
-    <div className="relative search-input-container w-96">
+    <div className=" search-input-container w-96">
       <input
         type="search"
         id={props.id}
         placeholder="Cari..."
         value={searchTerm}
         onChange={handleInputChange}
+        onClick={handleInputChange}
+        autoComplete='off'
         className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-500"
       />
 
+      {isOpen ? props.btnFilter : null}
+
       {isOpen && (
-        <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded border border-gray-200">
+        <ul className=" z-10 mt-1 w-full bg-white shadow-lg rounded border border-gray-200 max-h-60 overflow-y-auto">
           {searchResults.map((item, index) => (
             <li
               key={index}

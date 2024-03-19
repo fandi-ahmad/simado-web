@@ -54,7 +54,7 @@ const Student = () => {
 
   const getAllData = async () => {
     try {
-      const result = await GetAllStudent(page, limit, orderName, orderValue, idEntryYearFromParam)
+      const result = await GetAllStudent(page, limit, orderName, orderValue, search, idEntryYearFromParam)
       if (result.data) {
         setData(result.data)
         setTotalPage(result.total_page)
@@ -67,8 +67,8 @@ const Student = () => {
     switch (name) {
       case 'nisn': setNisn(value); break;
       case 'studentName': setStudentName(value); break;
-      case 'year': setYear(value); break;
       case 'entryYear': setEntryYear(value); break;
+      case 'search': setSearch(value); break;
       default: break;
     }
   };
@@ -92,6 +92,10 @@ const Student = () => {
     } else {
       getId('modalForm').showModal()
       cleanUpFormInput()
+
+      // get year from array dataEntryYear by id param
+      const entryYear = dataEntryYear.find(entry => entry.id === idEntryYearFromParam);
+      setYear(entryYear ? entryYear.year : null)
   
       if (dataParams.id) {
         // for edit
@@ -101,7 +105,6 @@ const Student = () => {
         setId(dataParams.id)
         setNisn(dataParams.nisn)
         setStudentName(dataParams.name)
-        setYear(dataParams.year)
       } else {
         // for create new
         setTextBtnAction('buat')
@@ -185,7 +188,7 @@ const Student = () => {
 
   useEffect(() => {
     getAllData()
-  }, [page, limit, orderName, orderValue, idEntryYearFromParam])
+  }, [page, limit, orderName, orderValue, search, idEntryYearFromParam])
 
   const openModalEntryYear = (dataParams = '') => {
     getId('modalFormEntryYear').showModal()
@@ -292,7 +295,7 @@ const Student = () => {
                     </BaseDropdownUl>
                   </div>
 
-                  <BaseInput type='search' placeholder='Cari...' />
+                  <BaseInput type='search' placeholder='Cari...' name='search' value={search} onChange={handleInput} />
                 
                 </div>}
               
@@ -357,6 +360,10 @@ const Student = () => {
           <h3 className="font-bold text-lg capitalize">{textInfo}</h3>
           <InputColumn idError='nisnError' text='NISN' name='nisn' onChange={handleInput} value={nisn} required />
           <InputColumn idError='studentNameError' text='Nama siswa' name='studentName' onChange={handleInput} value={studentName} required />
+          <div className='flex justify-between'>
+            <p>Tahun masuk siswa</p>
+            <p className='w-96 font-semibold'>{year}</p>
+          </div>
         </>}
 
         addButton={<ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />}

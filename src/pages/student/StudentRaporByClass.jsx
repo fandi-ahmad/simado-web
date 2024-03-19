@@ -8,12 +8,13 @@ import { GetAllClass } from '../../api/student/class'
 import { CreateStudentFile, DeleteStudentFile, GetAllStudentFile, UpdateStudentFile } from '../../api/student/studentFile'
 import { ActionListData, BaseTable, TableData, TableHead } from '../../components/BaseTable'
 import { ModalAlert, ModalForm } from '../../components/BaseModal'
-import { downloadFile, getId } from '../../function/baseFunction'
+import { downloadFile, formatDateAndTime, getId } from '../../function/baseFunction'
 import { InputColumn, SearchInput } from '../../components/BaseInput'
 import { GetAllStudent } from '../../api/student/student'
 import { useGlobalState } from '../../state/state'
 import { ButtonPrimary } from '../../components/BaseButton'
 import { BaseDropdownUl, DropdownListData } from '../../components/Dropdown'
+import { GetAllEntryYear } from '../../api/student/entryYear'
 
 const StudentRaporByClass = () => {
   const params = useParams()
@@ -36,19 +37,33 @@ const StudentRaporByClass = () => {
   const [fileName, setFileName] = useState('')
   const [semester, setSemester] = useState('1')
   const [idStudent, setIdStudent] = useState('')
+  const [studentName, setStudentName] = useState('')
 
   const [elementFound, setElementFound] = useState(false)
   const [searchTerm, setSearchTerm] = useGlobalState('searchTerm')
+
+  const [search, setSearch] = useState('')
 
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [orderName, setOrderName] = useState('updatedAt')
   const [orderValue, setOrderValue] = useState('DESC')
+  const [searchStudent, setSearchStudent] = useState('')
+  const [idEntryYear, setIdEntryYear] = useState('')
+
+  const [dataEntryYear, setDataEntryYear] = useState([])
 
   const getAllData = async () => {
     try {
       const result = await GetAllStudentFile(idStudyYear, idClassName, semester, page, limit, orderName, orderValue)
       setData(result.data)
+    } catch (error) {}
+  }
+
+  const getAllDataEntryYear = async () => {
+    try {
+      const result = await GetAllEntryYear()
+      if (result.data) setDataEntryYear(result.data)
     } catch (error) {}
   }
 
@@ -68,8 +83,9 @@ const StudentRaporByClass = () => {
 
   const getAllDataStudent = async () => {
     try {
-      const result = await GetAllStudent(page, limit, 'name', 'ASC')
+      const result = await GetAllStudent(page, limit, 'name', 'ASC', searchStudent, idEntryYear)
       setDataStudent(result.data)
+      console.log(result, '<-- result get data student');
     } catch (error) {}
   }
 
@@ -176,6 +192,7 @@ const StudentRaporByClass = () => {
               <TableHead text='NISN' />
               <TableHead text='Nama siswa' />
               <TableHead />
+              <TableHead text='Diperbarui pada' />
               <TableHead />
               <TableHead />
             </>}
@@ -190,6 +207,8 @@ const StudentRaporByClass = () => {
                     ? <i className="fa-solid fa-file-circle-check text-lg text-green-400"></i> 
                     : <i className="fa-solid fa-file-circle-xmark text-lg text-red-400"></i>} 
                   />
+                  <TableData text={formatDateAndTime(data.updatedAt)} />
+
                   <TableData className='w-full' />
                   <TableData text={
                     <BaseDropdownUl icon='fa-ellipsis-vertical'>
@@ -214,8 +233,16 @@ const StudentRaporByClass = () => {
   useEffect(() => {
     getStudyYearById()
     getClassById()
-    getAllDataStudent()
+    getAllDataEntryYear()
   }, [])
+
+  useEffect(() => {
+    getAllDataStudent()
+  }, [idEntryYear])
+
+  useEffect(() => {
+    getId('studentList').click()
+  }, [dataStudent])
   
 
   useEffect(() => {
@@ -291,10 +318,23 @@ const StudentRaporByClass = () => {
 
           <div>
             <InputColumn idError='fileUploadError' text={textFileInput} type='file' onChange={handleInputFile} name='file_upload' id='fileUpload' />
-
             <div className='mb-2 flex justify-between w-full'>
               <p className="pt-4 mb-2 mr-2">NISN / Nama siswa</p>
-              <SearchInput data={dataStudent} onSelect={handleSelectItem} idError='studentListError' />
+              <SearchInput data={dataStudent} onSelect={handleSelectItem} idError='studentListError' id='studentList'
+                btnFilter={<>{
+                  dataEntryYear[0] ? dataEntryYear.map((data) => (
+                    <button key={data.id} onClick={() => setIdEntryYear(data.id)} className={`btn-sm btn mt-1 mr-2 px-1 text-gray-600 ${idEntryYear == data.id ? 'bg-gray-400' : ''}`}>
+                      {data.year}
+                    </button>
+                  )) : null
+                }
+
+                <button onClick={() => setIdEntryYear('')} className='btn-sm btn mt-1 mr-2 px-3.5 bg-red-200 hover:bg-red-300 text-gray-600'>
+                <i className="fa-solid fa-xmark"></i>
+                </button>
+
+                </>}
+              />
             </div>
             
           </div>
