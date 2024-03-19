@@ -162,8 +162,17 @@ const Student = () => {
     try {
       getId('closeBtnConfirm').click()
 
+      // delete student
       if (id) await DeleteStudent(id)
-      if (idEntryYear) await DeleteEntryYear(idEntryYear)
+
+      // delete entry year
+      if (idEntryYear) {
+        const result = await DeleteEntryYear(idEntryYear)
+        if (result.status !== 200) {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        }
+      }
       
       getAllData()
       getAllDataEntryYear()
