@@ -8,13 +8,15 @@ import { GetAllClass } from '../../api/student/class'
 import { CreateStudentFile, DeleteStudentFile, GetAllStudentFile, UpdateStudentFile } from '../../api/student/studentFile'
 import { ActionListData, BaseTable, TableData, TableHead } from '../../components/BaseTable'
 import { ModalAlert, ModalForm } from '../../components/BaseModal'
-import { downloadFile, getId } from '../../function/baseFunction'
+import { downloadFile, formatDateAndTime, getId } from '../../function/baseFunction'
 import { InputColumn, SearchInput } from '../../components/BaseInput'
 import { GetAllStudent } from '../../api/student/student'
 import { useGlobalState } from '../../state/state'
+import { ButtonPrimary } from '../../components/BaseButton'
+import { BaseDropdownUl, DropdownListData } from '../../components/Dropdown'
+import { GetAllEntryYear } from '../../api/student/entryYear'
 
 const StudentRaporByClass = () => {
-  const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const params = useParams()
   const navigate = useNavigate()
   const idStudyYear = params.id_study_year
@@ -35,14 +37,33 @@ const StudentRaporByClass = () => {
   const [fileName, setFileName] = useState('')
   const [semester, setSemester] = useState('1')
   const [idStudent, setIdStudent] = useState('')
+  const [studentName, setStudentName] = useState('')
 
   const [elementFound, setElementFound] = useState(false)
   const [searchTerm, setSearchTerm] = useGlobalState('searchTerm')
 
+  const [search, setSearch] = useState('')
+
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [orderName, setOrderName] = useState('updatedAt')
+  const [orderValue, setOrderValue] = useState('DESC')
+  const [searchStudent, setSearchStudent] = useState('')
+  const [idEntryYear, setIdEntryYear] = useState('')
+
+  const [dataEntryYear, setDataEntryYear] = useState([])
+
   const getAllData = async () => {
     try {
-      const result = await GetAllStudentFile(idStudyYear, idClassName, semester)
+      const result = await GetAllStudentFile(idStudyYear, idClassName, semester, page, limit, orderName, orderValue)
       setData(result.data)
+    } catch (error) {}
+  }
+
+  const getAllDataEntryYear = async () => {
+    try {
+      const result = await GetAllEntryYear()
+      if (result.data) setDataEntryYear(result.data)
     } catch (error) {}
   }
 
@@ -62,8 +83,9 @@ const StudentRaporByClass = () => {
 
   const getAllDataStudent = async () => {
     try {
-      const result = await GetAllStudent()
+      const result = await GetAllStudent(page, limit, 'name', 'ASC', searchStudent, idEntryYear)
       setDataStudent(result.data)
+      console.log(result, '<-- result get data student');
     } catch (error) {}
   }
 
@@ -84,8 +106,9 @@ const StudentRaporByClass = () => {
     setId('')
     getId('fileUpload').value = ''
     setSearchTerm('')
+    getId('fileUploadError').classList.add('hidden')
+    getId('studentListError').classList.add('hidden')
   }
-
 
   const openModal = (dataParams = '') => {
     getId('modalForm').showModal()
@@ -115,7 +138,8 @@ const StudentRaporByClass = () => {
   }
 
   const createOrUpdateData = async () => {
-    getId('closeBtn').click()
+    if (!id && fileUpload == '') getId('fileUploadError').classList.remove('hidden')
+    if (idStudent == '') getId('studentListError').classList.remove('hidden')
 
     const formData = new FormData();
     formData.append('id_student', idStudent)
@@ -127,13 +151,15 @@ const StudentRaporByClass = () => {
     formData.append('file_upload', fileUpload)
 
     // create
-    if (!id) {
+    if (!id && fileUpload && idStudent) {
+      getId('closeBtn').click()
       await CreateStudentFile(formData)
     }
 
     // update
-    if (id) {
+    if (id && idStudent) {
       formData.append('id', id)
+      getId('closeBtn').click()
       await UpdateStudentFile(formData)
     }
 
@@ -159,13 +185,14 @@ const StudentRaporByClass = () => {
   const dataStudentFileInTable = () => {
     return (
       <>
-        {!data[0] ? <div className='w-full text-center text-xl pb-6'>-- belum ada data --</div> : 
+        {!data[0] ? <div className='w-full text-center text-xl pb-6'>-- Belum ada data --</div> : 
           <BaseTable
             thead={<>
               <TableHead text='No' className='w-12' />
               <TableHead text='NISN' />
               <TableHead text='Nama siswa' />
               <TableHead />
+              <TableHead text='Diperbarui pada' />
               <TableHead />
               <TableHead />
             </>}
@@ -180,23 +207,17 @@ const StudentRaporByClass = () => {
                     ? <i className="fa-solid fa-file-circle-check text-lg text-green-400"></i> 
                     : <i className="fa-solid fa-file-circle-xmark text-lg text-red-400"></i>} 
                   />
+                  <TableData text={formatDateAndTime(data.updatedAt)} />
+
                   <TableData className='w-full' />
                   <TableData text={
-                    <>
-                      <div className='dropdown dropdown-end mr-4'>
-                        <button tabIndex={1} role='button' className='btn btn-sm'>
-                          <i className="fa-solid fa-ellipsis-vertical"></i>
-                        </button>
-                        <ul tabIndex={10} className="dropdown-content z-10 absolute menu p-2 shadow bg-base-100 rounded-md w-52 border border-gray-300 font-medium">
-                          <ActionListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
-                          <ActionListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
-                          <ActionListData icon='fa-circle-info' text='Detail' />
-                          <ActionListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
-                          {/* <ActionListData icon='fa-up-down-left-right' text='Pindahkan' onClick={() => openModalChangeCategory(data)} /> */}
-                          <ActionListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
-                        </ul>
-                      </div>
-                    </>
+                    <BaseDropdownUl icon='fa-ellipsis-vertical'>
+                      <DropdownListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
+                      <DropdownListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
+                      <DropdownListData icon='fa-circle-info' text='Detail' />
+                      <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
+                      <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
+                    </BaseDropdownUl>
                   } className='w-48' />
                 </tr>
               ))}
@@ -212,8 +233,16 @@ const StudentRaporByClass = () => {
   useEffect(() => {
     getStudyYearById()
     getClassById()
-    getAllDataStudent()
+    getAllDataEntryYear()
   }, [])
+
+  useEffect(() => {
+    getAllDataStudent()
+  }, [idEntryYear])
+
+  useEffect(() => {
+    getId('studentList').click()
+  }, [dataStudent])
   
 
   useEffect(() => {
@@ -260,11 +289,11 @@ const StudentRaporByClass = () => {
         <Container>
 
           <div className='flex justify-end mb-4'>
-            <button className={'mr-2 '+btnClass} onClick={() => openModal()}>buat rapor siswa <i className="fa-solid fa-plus"></i></button>
+            <ButtonPrimary text='buat rapor siswa' icon='fa-plus' onClick={() => openModal()} />
           </div>
 
           <ContainerRow className='-mx-3 relative'>
-            <div role="tablist" className="tabs tabs-lifted w-full">
+            <div role="tablist" className="tabs tabs-lifted w-full pb-28">
               <input type="radio" name="semester" id='1' onChange={(e) => setSemester(e.target.id)} role="tab" className="tab" aria-label='Semester 1' />
               <div role="tabpanel" className="tab-content bg-white border-base-300 rounded-box pt-6 w-full">
                 {dataStudentFileInTable()}
@@ -274,13 +303,10 @@ const StudentRaporByClass = () => {
               <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box pt-6 w-full">
                 {dataStudentFileInTable()}
               </div>
-            
             </div>
           </ContainerRow>
 
-
         </Container>
-
       </Main>
 
       {/* modal for form input */}
@@ -292,19 +318,30 @@ const StudentRaporByClass = () => {
 
           <div>
             <InputColumn idError='fileUploadError' text={textFileInput} type='file' onChange={handleInputFile} name='file_upload' id='fileUpload' />
-
             <div className='mb-2 flex justify-between w-full'>
-              <p className="pt-4 mb-2 mr-2">Nama siswa</p>
-              <SearchInput data={dataStudent} onSelect={handleSelectItem} id='studentListInput' />
+              <p className="pt-4 mb-2 mr-2">NISN / Nama siswa</p>
+              <SearchInput data={dataStudent} onSelect={handleSelectItem} idError='studentListError' id='studentList'
+                btnFilter={<>{
+                  dataEntryYear[0] ? dataEntryYear.map((data) => (
+                    <button key={data.id} onClick={() => setIdEntryYear(data.id)} className={`btn-sm btn mt-1 mr-2 px-1 text-gray-600 ${idEntryYear == data.id ? 'bg-gray-400' : ''}`}>
+                      {data.year}
+                    </button>
+                  )) : null
+                }
+
+                <button onClick={() => setIdEntryYear('')} className='btn-sm btn mt-1 mr-2 px-3.5 bg-red-200 hover:bg-red-300 text-gray-600'>
+                <i className="fa-solid fa-xmark"></i>
+                </button>
+
+                </>}
+              />
             </div>
             
           </div>
 
         </>}
 
-        addButton={<>
-          <button className={"btn "+btnClass} onClick={createOrUpdateData}>{textBtnAction}</button>
-        </>}
+        addButton={<ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />}
       />
 
       {/* modal confirm */}
@@ -313,7 +350,7 @@ const StudentRaporByClass = () => {
         text='Yakin ingin menghapusnya??'
         idCloseBtn='closeBtnConfirm'
         closeText='Batal'
-        addButton={<button className={"btn "+btnClass} onClick={deleteData}>Ya, Hapus</button>}
+        addButton={<ButtonPrimary text='ya, hapus' onClick={deleteData} />}
       />
 
     </>

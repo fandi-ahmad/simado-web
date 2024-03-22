@@ -1,7 +1,7 @@
 import { callApi } from "../utils"
 
-export const GetAllStudent = () => {
-  return callApi('get', `/student/`)
+export const GetAllStudent = (page, limit, order, orderValue, search, entryYear = '') => {
+  return callApi('get', `/student?page=${page}&limit=${limit}&order=${order}&order_value=${orderValue}&search=${search}&entry_year=${entryYear}`)
 }
 
 export const CreateStudent = (data) => {

@@ -43,3 +43,19 @@ export const limitText = (text, limit = 30) => {
     return text.substring(0, limit) + "...";
   }
 }
+
+export const formatDateAndTime = (isoString) => {
+  const dateObj = new Date(isoString);
+
+  // Format waktu dalam format HH:mm:ss
+  const time = dateObj.toLocaleTimeString('id-ID', { hour12: false });
+
+  // Mengganti pemisah waktu dari . menjadi :
+  const formattedTime = time.replace(/\./g, ':');
+
+  // Format tanggal dalam format DD MMMM YYYY
+  const options = { day: '2-digit', month: 'long', year: 'numeric' };
+  const date = dateObj.toLocaleDateString('id-ID', options);
+
+  return `${formattedTime}, ${date}`;
+}

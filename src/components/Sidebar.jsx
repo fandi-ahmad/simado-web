@@ -7,14 +7,16 @@ import { getId } from '../function/baseFunction'
 import { ModalAlert, ModalForm } from './BaseModal'
 import { BaseInput } from './BaseInput'
 import { ListMenu, ListMenuChild, SubListMenu } from './sidebarPart'
+import { DropdownListData } from './Dropdown'
+import { ButtonPrimary } from './BaseButton'
 
 const Sidebar = () => {
-  const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const [asideClass, setAsideClass] = useGlobalState('asideClass')
   const [dataCategory, setDataCategory] = useState([])
   const [categoryName, setCategoryName] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [textInfo, setTextInfo] = useState('Buat kategori baru')
+  const [textBtnAction, setTextBtnAction] = useState('Buat')
   const [textAlert, setTextAlert] = useState('')
   const navigate = useNavigate()
   const params = useParams()
@@ -33,12 +35,10 @@ const Sidebar = () => {
 
     if (id) {
       setTextInfo('Edit kategori')
-      getId('btnCreateCategory').classList.add('hidden')
-      getId('btnUpdateCategory').classList.remove('hidden')
+      setTextBtnAction('Simpan')
     } else {
       setTextInfo('Buat kategori baru')
-      getId('btnCreateCategory').classList.remove('hidden')
-      getId('btnUpdateCategory').classList.add('hidden')
+      setTextBtnAction('Buat')
     }
 
     getId('errorMsg').classList.add('hidden')
@@ -64,23 +64,19 @@ const Sidebar = () => {
     }
   }
 
-  const createCategory = async () => {
+  const createOrUpdateData = async () => {
     try {
       const validate = validateInput()
       if (validate) {
-        await CreateCategory({name: categoryName})
-        getAllData()
-      }
-    } catch (error) {}
-  }
 
-  const updateCategory = async () => {
-    try {
-      const validate = validateInput()
-      if (validate) {
-        await UpdateCategory({name: categoryName, id: categoryId})
+        // create
+        if (!categoryId) await CreateCategory({name: categoryName})
+
+        // update
+        if (categoryId) await UpdateCategory({name: categoryName, id: categoryId})
+
+        setTimeout(() => { getAllData() }, 100)
       }
-      setTimeout(() => { getAllData() }, 100)
     } catch (error) {}
   }
 
@@ -92,17 +88,22 @@ const Sidebar = () => {
   const deleteCategory = async () => {
     try {
       getId('closeBtnConfirmCategory').click()
-      await DeleteCategory(categoryId)
-      getAllData()
-      navigate('/document')
-    } catch (error) {
-      if (error.status == 405) {
+      const {status} = await DeleteCategory(categoryId)
+
+      if (status == 200) navigate('/document')
+
+      if (status == 405) {
         setTextAlert('Tidak bisa dihapus, karena kategori ini sudah digunakan pada File Dokumen!')
-      } else {
-        setTextAlert('Terjadi kesalahan!')
+        getId('modalAlertCategory').showModal()
       }
-      getId('modalAlertCategoryCategory').showModal()
-    }
+
+      if (status == 500) {
+        setTextAlert('Terjadi kesalahan!')
+        getId('modalAlertCategory').showModal()
+      }
+
+      getAllData()
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -111,7 +112,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <aside className={'sidebar max-w-62.5 ease-nav-brand z-990 fixed inset-y-0 my-4 ml-4 block w-full -translate-x-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 p-0 antialiased transition-transform duration-200 xl:left-0 xl:translate-x-0 ps bg-white xl:bg-white ' + asideClass}>
+      <aside className={'sidebar max-w-62.5 ease-nav-brand z-10 fixed inset-y-0 my-4 ml-4 block w-full -translate-x-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 p-0 antialiased transition-transform duration-200 xl:left-0 xl:translate-x-0 ps bg-white xl:bg-white ' + asideClass}>
         <div className="h-19.5">
           <i onClick={() => setAsideClass(asideClass === 'shadow-soft-xl' ? 'translate-x-0' : 'shadow-soft-xl')} className="absolute top-0 right-0 p-4 opacity-50 cursor-pointer fas fa-times text-slate-400 xl:hidden" ></i>
           <a className="block px-8 py-6 m-0 text-sm whitespace-nowrap text-slate-700">
@@ -147,8 +148,8 @@ const Sidebar = () => {
                   </div>
 
                   <ul tabIndex={1} className="dropdown-content z-10 menu p-2 drop-shadow-md bg-base-100 rounded-md border border-gray-300 w-52">
-                    <li onClick={() => openModal(data.name, data.id)}><a>Ganti nama</a></li>
-                    <li onClick={() => openModalConfirm(data.id)}><a>Hapus kategori</a></li>
+                    <DropdownListData icon='fa-pen-to-square' text='Ganti nama' onClick={() => openModal(data.name, data.id)} />
+                    <DropdownListData icon='fa-trash-can' text='Hapus kategori' onClick={() => openModalConfirm(data.id)} />
                   </ul>
 
                 </div>
@@ -187,10 +188,7 @@ const Sidebar = () => {
         </>}
 
         idCloseBtn='closeBtnCategory'
-        addButton={<>
-          <button className={"btn hidden "+btnClass} id='btnCreateCategory' onClick={createCategory}>Buat</button>
-          <button className={"btn hidden "+btnClass} id='btnUpdateCategory' onClick={updateCategory}>Simpan</button>
-        </>}
+        addButton={<ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />}
       />
 
       {/* modal confirm */}
@@ -199,7 +197,7 @@ const Sidebar = () => {
         text='Yakin ingin menghapusnya??'
         idCloseBtn='closeBtnConfirmCategory'
         closeText='Batal'
-        addButton={<button className={"btn "+btnClass} onClick={deleteCategory}>Ya, Hapus</button>}
+        addButton={<ButtonPrimary text='Ya, Hapus' onClick={deleteCategory} />}
       />
 
       {/* alert */}

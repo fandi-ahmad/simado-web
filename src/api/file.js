@@ -1,11 +1,11 @@
 import { callApi } from "./utils"
 
-export const GetAllFile = () => {
-  return callApi('get', '/file')
+export const GetAllFile = (page, limit, order, orderValue, search = '') => {
+  return callApi('get', `/file?page=${page}&limit=${limit}&order=${order}&order_value=${orderValue}&search=${search}`)
 }
 
-export const GetAllFileByCategory = (id) => {
-  return callApi('get', '/file/category/'+id)
+export const GetAllFileByCategory = (id, page, limit, order, orderValue, search = '') => {
+  return callApi('get', `/file/category/${id}?page=${page}&limit=${limit}&order=${order}&order_value=${orderValue}&search=${search}`)
 }
 
 export const CreateFile = (data) => {
