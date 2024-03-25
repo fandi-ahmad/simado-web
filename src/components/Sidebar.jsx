@@ -166,7 +166,6 @@ const Sidebar = () => {
             <SubListMenu text='Data Siswa' className='mt-8' />
             <ListMenuChild text='Data siswa' to='/data/student' />
             <ListMenuChild text='Rapor' to='/rapor/study-year' />
-            <ListMenuChild text='Ijazah' />
 
 
             <SubListMenu text='Akun' />

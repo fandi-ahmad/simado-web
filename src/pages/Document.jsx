@@ -30,9 +30,7 @@ const Document = () => {
   const [format, setFormat] = useState('')
   const [idCategory, setIdCategory] = useState('')
   const [categoryName, setCategoryName] = useState('')
-  const meta = useRef({
-    id_user: '81ba78db-8c01-4ce4-ad1d-d656320fada9' //temporary
-  })
+  
   const params = useParams()
   const navigate = useNavigate()
   const [createdAt, setCreatedAt] = useState('')
@@ -158,7 +156,6 @@ const Document = () => {
       if (!id && fileUpload == '') getId('fileUploadError').classList.remove('hidden')
       
       const formData = new FormData();
-      formData.append('id_user', meta.current.id_user)
       formData.append('id_category', idCategory)
       formData.append('file_name', fileName)
       formData.append('number', number)
@@ -166,19 +163,28 @@ const Document = () => {
       formData.append('format', format)
       formData.append('file_upload', fileUpload)
 
-      // create
-      if (!id && fileName && fileUpload) {
-        getId('closeBtn').click()
-        await CreateFile(formData)
+      if (!idCategory || idCategory == '-') {
+        // cek kondisi saat pindahkan kategori
+        setTextAlert('Pilih kategori terlebih dahulu!')
+        getId('modalAlert').showModal()
+      } else {
+
+        // create
+        if (!id && fileName && fileUpload) {
+          getId('closeBtn').click()
+          await CreateFile(formData)
+        }
+  
+        // update
+        if (id && fileName) {
+          formData.append('id', id)
+          getId('closeBtn').click()
+          getId('closeBtnChangeCategory').click()
+          await UpdateFile(formData)
+        }
+
       }
 
-      // update
-      if (id && fileName) {
-        formData.append('id', id)
-        getId('closeBtn').click()
-        getId('closeBtnChangeCategory').click()
-        await UpdateFile(formData)
-      }
       
       setTimeout(() => { getAllData() }, 100)
     } catch (error) {

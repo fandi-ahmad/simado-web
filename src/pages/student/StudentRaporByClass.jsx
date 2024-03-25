@@ -55,8 +55,8 @@ const StudentRaporByClass = () => {
 
   const getAllData = async () => {
     try {
-      const result = await GetAllStudentFile(idStudyYear, idClassName, semester, page, limit, orderName, orderValue)
-      setData(result.data)
+      const result = await GetAllStudentFile(idStudyYear, idClassName, semester, page, limit, orderName, orderValue, 'rapor')
+      if (result.data) setData(result.data)
     } catch (error) {}
   }
 
@@ -84,8 +84,7 @@ const StudentRaporByClass = () => {
   const getAllDataStudent = async () => {
     try {
       const result = await GetAllStudent(page, limit, 'name', 'ASC', searchStudent, idEntryYear)
-      setDataStudent(result.data)
-      console.log(result, '<-- result get data student');
+      if (result.data) setDataStudent(result.data)
     } catch (error) {}
   }
 
@@ -191,7 +190,6 @@ const StudentRaporByClass = () => {
               <TableHead text='No' className='w-12' />
               <TableHead text='NISN' />
               <TableHead text='Nama siswa' />
-              <TableHead />
               <TableHead text='Diperbarui pada' />
               <TableHead />
               <TableHead />
@@ -203,10 +201,6 @@ const StudentRaporByClass = () => {
                   <TableData text={index+1} />
                   <TableData text={data.nisn} />
                   <TableData text={data.student_name} />
-                  <TableData text={data.file || data.file_name 
-                    ? <i className="fa-solid fa-file-circle-check text-lg text-green-400"></i> 
-                    : <i className="fa-solid fa-file-circle-xmark text-lg text-red-400"></i>} 
-                  />
                   <TableData text={formatDateAndTime(data.updatedAt)} />
 
                   <TableData className='w-full' />
