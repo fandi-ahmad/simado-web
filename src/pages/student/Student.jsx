@@ -121,7 +121,7 @@ const Student = () => {
         // for create new
         setTextBtnAction('buat')
         setTextInfo('Buat data siswa baru')
-        setTextFileInput('Perbarui ijazah siswa')
+        setTextFileInput('Upload ijazah siswa')
       }
     }
 
@@ -174,7 +174,13 @@ const Student = () => {
       getId('closeBtnConfirm').click()
 
       // delete student
-      if (id) await DeleteStudent(id)
+      if (id) {
+        const result = await DeleteStudent(id)
+        if (result.status !== 200) {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        }
+      }
 
       // delete entry year
       if (idEntryYear) {

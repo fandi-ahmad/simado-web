@@ -16,6 +16,7 @@ const StudyYear = () => {
   const [id, setId] = useState('')
   const [textInfo, setTextInfo] = useState('')
   const [textBtnAction, setTextBtnAction] = useState('Buat')
+  const [textAlert, setTextAlert] = useState('')
   const navigate = useNavigate()
 
   const getAllData = async () => {
@@ -71,7 +72,11 @@ const StudyYear = () => {
   const deleteData = async () => {
     try {
       getId('closeBtnConfirm').click()
-      await DeleteStudyYear(id)
+      const result = await DeleteStudyYear(id)
+      if (result.status !== 200) {
+        setTextAlert(result.message)
+        getId('modalAlert').showModal()
+      }
       getAllData()
     } catch (error) {
       setTextAlert('Terjadi kesalahan!')
@@ -134,6 +139,13 @@ const StudyYear = () => {
         idCloseBtn='closeBtnConfirm'
         closeText='Batal'
         addButton={<ButtonPrimary text='ya, hapus' onClick={deleteData} />}
+      />
+
+      {/* alert */}
+      <ModalAlert
+        id='modalAlert'
+        text={textAlert}
+        idCloseBtn='closeBtnAlert'
       />
 
 
