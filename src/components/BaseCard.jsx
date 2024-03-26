@@ -69,7 +69,6 @@ export const CardFolder = (props) => {
 
       <ul tabIndex={1} className="dropdown-content z-10 menu mr-4 p-2 drop-shadow-md bg-base-100 rounded-md border border-gray-300 w-52">
         {actionList('fa-pen-to-square', 'Ganti nama', props.onClickEdit)}
-        {actionList('fa-circle-info', 'Detail')}
         {actionList('fa-trash-can', 'Hapus', props.onClickDelete)}
       </ul>
     </div>
