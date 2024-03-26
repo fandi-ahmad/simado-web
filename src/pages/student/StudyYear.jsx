@@ -29,7 +29,7 @@ const StudyYear = () => {
   const handleInput = (e) => {
     const { name, value } = e.target;
     switch (name) {
-      case 'studyYear': setStudyYear(value); break;
+      case 'studyYear': if (/^[0-9/-]*$/.test(value) && value.length <= 9) setStudyYear(value); break;
       default: break;
     }
   };

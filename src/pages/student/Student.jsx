@@ -70,7 +70,7 @@ const Student = () => {
     switch (name) {
       case 'nisn': setNisn(value); break;
       case 'studentName': setStudentName(value); break;
-      case 'entryYear': setEntryYear(value); break;
+      case 'entryYear': if (/^[0-9]*$/.test(value) && value.length <= 4) setEntryYear(value); break;
       case 'search': setSearch(value); break;
       default: break;
     }
@@ -240,7 +240,7 @@ const Student = () => {
 
       if (entryYear.length !== 4) {
         
-        setTextAlert('Jumlah karakter harus 4')
+        setTextAlert('Jumlah karakter minimal 4')
         getId('modalAlert').showModal()
       } else {
 
