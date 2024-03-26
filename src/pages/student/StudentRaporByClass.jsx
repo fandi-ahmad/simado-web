@@ -9,10 +9,10 @@ import { CreateStudentFile, DeleteStudentFile, GetAllStudentFile, UpdateStudentF
 import { ActionListData, BaseTable, TableData, TableHead } from '../../components/BaseTable'
 import { ModalAlert, ModalForm } from '../../components/BaseModal'
 import { downloadFile, formatDateAndTime, getId } from '../../function/baseFunction'
-import { InputColumn, SearchInput } from '../../components/BaseInput'
+import { BaseInput, InputColumn, SearchInput } from '../../components/BaseInput'
 import { GetAllStudent } from '../../api/student/student'
 import { useGlobalState } from '../../state/state'
-import { ButtonPrimary } from '../../components/BaseButton'
+import { BaseButton, ButtonPrimary } from '../../components/BaseButton'
 import { BaseDropdownUl, DropdownListData } from '../../components/Dropdown'
 import { GetAllEntryYear } from '../../api/student/entryYear'
 
@@ -53,10 +53,17 @@ const StudentRaporByClass = () => {
 
   const [dataEntryYear, setDataEntryYear] = useState([])
 
+  const [totalPage, setTotalPage] = useState(1)
+  const [isBtnPrevious, setIsBtnPrevious] = useState()
+  const [isBtnNext, setIsBtnNext] = useState()
+
   const getAllData = async () => {
     try {
-      const result = await GetAllStudentFile(idStudyYear, idClassName, semester, page, limit, orderName, orderValue, 'rapor')
-      if (result.data) setData(result.data)
+      const result = await GetAllStudentFile(idStudyYear, idClassName, semester, page, limit, orderName, orderValue, search)
+      if (result.data) {
+        setData(result.data)
+        setTotalPage(result.total_page)
+      }
     } catch (error) {}
   }
 
@@ -88,6 +95,13 @@ const StudentRaporByClass = () => {
     } catch (error) {}
   }
 
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case 'search': setSearch(value); break;
+      default: break;
+    }
+  };
 
   const handleInputFile = (e) => {
     const fileSelect = e.target.files[0]
@@ -180,45 +194,92 @@ const StudentRaporByClass = () => {
     }
   }
 
+  const shortData = (order, value) => {
+    setOrderName(order)
+    setOrderValue(value)
+  }
+
+  const checkPaginationBtn = () => {
+    page == 1 ? setIsBtnPrevious(true) : setIsBtnPrevious(false)
+    page >= totalPage ? setIsBtnNext(true) : setIsBtnNext(false)
+  }
+
+  useEffect(() => {
+    checkPaginationBtn()
+  }, [page, totalPage])
+
+  useEffect(() => {
+    setPage(1)
+  }, [limit])
 
   const dataStudentFileInTable = () => {
     return (
       <>
-        {!data[0] ? <div className='w-full text-center text-xl pb-6'>-- Belum ada data --</div> : 
-          <BaseTable
-            thead={<>
-              <TableHead text='No' className='w-12' />
-              <TableHead text='NISN' />
-              <TableHead text='Nama siswa' />
-              <TableHead text='Diperbarui pada' />
-              <TableHead />
-              <TableHead />
-            </>}
+        <BaseTable
+          filter={<div className='flex flex-row justify-between'>
+            <div>
+              <BaseDropdownUl text='Tampilkan:' btnText={limit} btnClassName='bg-gray-300 mr-4' className='w-20'>
+                <DropdownListData text='10' onClick={() => setLimit(10)} />
+                <DropdownListData text='25' onClick={() => setLimit(25)} />
+                <DropdownListData text='50' onClick={() => setLimit(50)} />
+                <DropdownListData text='100' onClick={() => setLimit(100)} />
+              </BaseDropdownUl>
 
-            tbody={<>
-              {data.map((data, index) => (
-                <tr key={data.id}>
-                  <TableData text={index+1} />
-                  <TableData text={data.nisn} />
-                  <TableData text={data.student_name} />
-                  <TableData text={formatDateAndTime(data.updatedAt)} />
+              <BaseDropdownUl text='Urutkan:' icon='fa-arrow-down-wide-short' btnClassName='bg-gray-300'>
+                <DropdownListData icon={orderName == 'student_name' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Nama a - z' onClick={() => shortData('student_name', 'ASC')} />
+                <DropdownListData icon={orderName == 'student_name' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Nama z - a' onClick={() => shortData('student_name', 'DESC')} />
+                <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'DESC' ? 'fa-caret-right' : '-'} text='Tanggal terbaru' onClick={() => shortData('updatedAt', 'DESC')} />
+                <DropdownListData icon={orderName == 'updatedAt' && orderValue == 'ASC'  ? 'fa-caret-right' : '-'} text='Tanggal terlama' onClick={() => shortData('updatedAt', 'ASC')} />
+              </BaseDropdownUl>
+            </div>
 
-                  <TableData className='w-full' />
-                  <TableData text={
-                    <BaseDropdownUl icon='fa-ellipsis-vertical'>
-                      <DropdownListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
-                      <DropdownListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
-                      <DropdownListData icon='fa-circle-info' text='Detail' />
-                      <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
-                      <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
-                    </BaseDropdownUl>
-                  } className='w-48' />
-                </tr>
-              ))}
-              
-            </>}
-          />
-        }
+            <BaseInput type='search' placeholder='Cari...' name='search' value={search} onChange={handleInput} />
+          
+          </div>}
+
+          thead={ !data[0] ? <TableHead text='-- Belum ada data --' className='text-center' /> :
+          <>
+            <TableHead text='No' className='w-12' />
+            <TableHead text='NISN' />
+            <TableHead text='Nama siswa' />
+            <TableHead text='Diperbarui pada' />
+            <TableHead />
+            <TableHead />
+          </>}
+
+          tbody={<>
+            { data[0] ? data.map((data, index) => (
+              <tr key={data.id}>
+                <TableData text={index+1} />
+                <TableData text={data.nisn} />
+                <TableData text={data.student_name} />
+                <TableData text={formatDateAndTime(data.updatedAt)} />
+
+                <TableData className='w-full' />
+                <TableData text={
+                  <BaseDropdownUl icon='fa-ellipsis-vertical'>
+                    <DropdownListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
+                    <DropdownListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
+                    <DropdownListData icon='fa-circle-info' text='Detail' />
+                    <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
+                    <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
+                  </BaseDropdownUl>
+                } className='w-48' />
+              </tr>
+            )) : null}
+
+            <tr>
+              <TableData className='text-end' colSpan='10' text={
+                <>
+                  <BaseButton className='btn-sm' icon='fa-caret-left' onClick={() => setPage(page - 1)} disabled={isBtnPrevious} />
+                  <span className='mx-2'>{page}/{totalPage}</span>
+                  <BaseButton className='btn-sm' icon='fa-caret-right' onClick={() => setPage(page + 1)} disabled={isBtnNext} />
+                </>}
+              />
+            </tr>
+            
+          </>}
+        />
       </>
     )
   }
@@ -241,7 +302,8 @@ const StudentRaporByClass = () => {
 
   useEffect(() => {
     getAllData()
-  }, [semester])
+  }, [semester, page, limit, orderName, orderValue, search])
+
 
   useEffect(() => {
     const getIdSemester = () => {
