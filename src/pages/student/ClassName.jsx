@@ -31,7 +31,7 @@ const ClassName = () => {
 
   const getAllData = async () => {
     try {
-      const result = await GetAllClass()
+      const result = await GetAllClass('', idStudyYear)
       setData(result.data)
     } catch (error) {}
   }
@@ -126,7 +126,7 @@ const ClassName = () => {
 
           <div className='grid grid-cols-4'>
             {data.map((data) => (
-              <CardFolder key={data.id} text={data.class_name}
+              <CardFolder key={data.id} text={data.class_name} count={data.count}
                 onClick={() => navigate(data.id)}
                 onClickEdit={() => openModal(data)}
                 onClickDelete={() => openModalConfirm(data.id)}

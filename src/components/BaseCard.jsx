@@ -59,8 +59,14 @@ export const CardFolder = (props) => {
     <div className='w-full px-2 pb-4 dropdown dropdown-end'>
       <div className='bg-white drop-shadow-md hover:bg-gray-200 flex justify-between items-center rounded-md cursor-pointer'>
         <div onClick={props.onClick} className='w-full py-4 pl-4'>
-          <i className="fa-solid fa-folder text-lg text-yellow-500"></i>
-          <span className='ml-2'>{props.text}</span>
+          <div>
+            <i className="fa-solid fa-folder text-lg text-yellow-500"></i>
+            <span className='ml-2'>{props.text}</span>
+          </div>
+          <div className='text-xs'>
+            <span>Total data: </span>
+            <span className='font-bold'>{props.count}</span>
+          </div>
         </div>
         <span tabIndex={0} role='button' className='px-2.5 mr-4 py-0.5 rounded-full hover:bg-gray-300'>
           <i className="fa-solid fa-ellipsis-vertical"></i>

@@ -106,7 +106,7 @@ const StudyYear = () => {
 
           <div className='grid grid-cols-4'>
             {data.map((data) => (
-              <CardFolder key={data.id} text={data.study_year}
+              <CardFolder key={data.id} text={data.study_year} count={data.count}
                 onClick={() => navigate(`/rapor/study-year/${data.id}/class`)}
                 onClickEdit={() => openModal(data)}
                 onClickDelete={() => openModalConfirm(data.id)}
