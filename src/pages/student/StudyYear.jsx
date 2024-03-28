@@ -53,19 +53,30 @@ const StudyYear = () => {
 
   const createOrUpdateData = async () => {
     try {
-      if (studyYear == '') {
-        getId('studyYearError').classList.remove('hidden')
-      } else {
-        getId('closeBtn').click()
-        
-        // create
-        if (!id) await CreateStudyYear({ study_year: studyYear })
+      if (studyYear == '') getId('studyYearError').classList.remove('hidden')
 
-        // update
-        if (id) await UpdateStudyYear({ study_year: studyYear, id: id })
-
-        setTimeout(() => { getAllData() }, 100)
+      const actionResult = (result) => {
+        if (result.status !== 200) {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        } else {
+          getId('closeBtn').click()
+        }
       }
+      
+      // create
+      if (!id && studyYear) {
+        const result = await CreateStudyYear({ study_year: studyYear })
+        actionResult(result)
+      }
+
+      // update
+      if (id && studyYear) {
+        const result = await UpdateStudyYear({ study_year: studyYear, id: id })
+        actionResult(result)
+      }
+
+      setTimeout(() => { getAllData() }, 100)
     } catch (error) {}
   }
 

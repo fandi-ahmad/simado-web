@@ -77,21 +77,31 @@ const ClassName = () => {
   const createOrUpdateData = async () => {
     try {
       if (className == '') getId('classNameError').classList.remove('hidden')
+
+      const actionResult = (result) => {
+        if (result.status !== 200) {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        } else {
+          getId('closeBtn').click()
+        }
+      }
       
       // create
       if (!id && className) {
-        await CreateClass({ class_name: className })
+        const result = await CreateClass({ class_name: className })
+        actionResult(result)
       }
 
       // update
       if (id && className) {
-        await UpdateClass({
+        const result = await UpdateClass({
           id: id,
           class_name: className
         })
+        actionResult(result)
       }
-      
-      getId('closeBtn').click()
+
       setTimeout(() => { getAllData() }, 100)
     } catch (error) {}
   }
@@ -100,7 +110,6 @@ const ClassName = () => {
     try {
       getId('closeBtnConfirm').click()
       const result = await DeleteClass(id)
-      console.log(result, '<-- result delete data');
       if (result.status !== 200) {
         setTextAlert(result.message)
         getId('modalAlert').showModal()

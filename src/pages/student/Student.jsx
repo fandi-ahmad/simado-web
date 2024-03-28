@@ -239,26 +239,32 @@ const Student = () => {
       if (entryYear == '') getId('entryYearError').classList.remove('hidden')
 
       if (entryYear.length !== 4) {
-        
         setTextAlert('Jumlah karakter minimal 4')
         getId('modalAlert').showModal()
       } else {
 
+        const actionResult = (result) => {
+          if (result.status !== 200) {
+            setTextAlert(result.message)
+            getId('modalAlert').showModal()
+          } else {
+            getId('closeBtnEntryYear').click()
+          }
+        }
+
         // create
         if (!idEntryYear && entryYear) {
-          getId('closeBtnEntryYear').click()
-          await CreateEntryYear({
-            year: entryYear
-          })
+          const result = await CreateEntryYear({  year: entryYear })
+          actionResult(result)
         }
   
         // update
         if (idEntryYear && entryYear) {
-          getId('closeBtnEntryYear').click()
-           await UpdateEntryYear({
+          const result = await UpdateEntryYear({
             id: idEntryYear,
             year: entryYear
           })
+          actionResult(result)
         }
 
       }
