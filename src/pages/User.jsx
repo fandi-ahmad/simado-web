@@ -157,7 +157,7 @@ const User = () => {
               </>}
 
               tbody={<>
-                {data.map((data, index) => (
+                {data ? data.map((data, index) => (
                   <tr key={data.id}>
                     <TableData text={index+1} />
                     <TableData text={data.username} />
@@ -171,7 +171,7 @@ const User = () => {
                       </BaseDropdownUl>
                     } className='w-48' />
                   </tr>
-                ))}
+                )) : null}
               </>}
             />
           </ContainerRow>

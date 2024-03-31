@@ -12,8 +12,7 @@ const Dashboard = () => {
   const getAllData = async () => {
     try {
       const result = await GetAllCount()
-      // if (result.data) setData(result.data)
-      setData(result.data)
+      if (result.data) setData(result.data);
     } catch (error) {
       
     }

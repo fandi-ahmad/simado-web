@@ -22,7 +22,8 @@ const StudyYear = () => {
   const getAllData = async () => {
     try {
       const result = await GetAllStudyYear()
-      setData(result.data)
+      console.log(result, '<-- result study year');
+      if (result.data) setData(result.data)
     } catch (error) {}
   }
 

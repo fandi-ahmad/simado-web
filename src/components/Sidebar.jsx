@@ -25,7 +25,8 @@ const Sidebar = () => {
   const getAllData = async () => {
     try {
       const { data } = await GetAllCategory()
-      setDataCategory(data)
+      if (data) setDataCategory(data)
+      
     } catch (error) {}
   }
 

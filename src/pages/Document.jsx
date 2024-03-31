@@ -351,9 +351,9 @@ const Document = () => {
         fill={<>
           <h3 className="font-semibold text-lg capitalize">Pindahkan "{fileName}"</h3>
           <SelectInput text={<>Lokasi saat ini: <span className='font-semibold'>{categoryName}</span></>} id='category' name='category' onChange={handleInput} option={
-            dataCategory.map((data) => (
+            dataCategory ? dataCategory.map((data) => (
               <option key={data.id} value={data.id}>{data.name}</option>
-            ))
+            )) : null
           } />
         </>}
 
