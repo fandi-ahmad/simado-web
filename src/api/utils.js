@@ -18,3 +18,13 @@ export const callApi = (method, url, data = null) => {
     return error.response.data
   });
 };
+
+export const callApiGet = async (url) => {
+  return axios.get(apiUrl+'/api/v1'+url, {
+    withCredentials: true,
+  }, headers())
+  .then(response => response.data)
+  .catch(error => {
+    return error.response.data
+  });
+};

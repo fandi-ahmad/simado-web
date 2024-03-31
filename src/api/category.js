@@ -1,7 +1,7 @@
-import { callApi } from "./utils"
+import { callApi, callApiGet } from "./utils"
 
 export const GetAllCategory = () => {
-  return callApi('get', '/category')
+  return callApiGet('/category')
 }
 
 export const CreateCategory = (data) => {

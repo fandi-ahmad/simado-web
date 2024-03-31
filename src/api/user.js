@@ -1,7 +1,7 @@
-import { callApi } from "./utils"
+import { callApi, callApiGet } from "./utils"
 
 export const GetAllUser = () => {
-  return callApi('get', '/user')
+  return callApiGet('/user')
 }
 
 export const CreateUser = (data) => {

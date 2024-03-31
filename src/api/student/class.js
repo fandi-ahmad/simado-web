@@ -1,7 +1,7 @@
-import { callApi } from "../utils"
+import { callApi, callApiGet } from "../utils"
 
 export const GetAllClass = (id = '', id_study_year = '') => {
-  return callApi('get', `/student/class/${id}?id_study_year=${id_study_year}`)
+  return callApiGet(`/student/class/${id}?id_study_year=${id_study_year}`)
 }
 
 export const CreateClass = (data) => {

@@ -1,7 +1,7 @@
-import { callApi } from "../utils"
+import { callApi, callApiGet } from "../utils"
 
 export const GetAllEntryYear = (id = '') => {
-  return callApi('get', `/student/entry-year/${id}`)
+  return callApiGet(`/student/entry-year/${id}`)
 }
 
 export const CreateEntryYear = (data) => {
