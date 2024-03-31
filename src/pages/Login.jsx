@@ -1,11 +1,16 @@
 import { React, useState, useEffect } from 'react'
 import { LoginUser } from '../api/auth'
+import { BaseInput } from '../components/BaseInput'
+import { ButtonPrimary } from '../components/BaseButton'
+import { getId } from '../function/baseFunction'
+import { ModalAlert } from '../components/BaseModal'
+import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
-  const classInput = 'focus:shadow-soft-primary-outline text-sm leading-5.6 ease-soft block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 transition-all focus:border-fuchsia-300 focus:outline-none focus:transition-shadow'
-  
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [textAlert, setTextAlert] = useState('')
+  const navigate = useNavigate()
 
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -18,12 +23,23 @@ const Login = () => {
 
   const loginBtn = async () => {
     try {
-      const result = await LoginUser({
-        username: username,
-        password: password
-      })
+      if (username == '') getId('usernameError').classList.remove('hidden')
+      if (password == '') getId('passwordError').classList.remove('hidden')
 
-      console.log(result, '<-- result login');
+      if (username && password) {
+        const result = await LoginUser({
+          username: username,
+          password: password
+        })
+
+        if (result.status !== 200) {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        } else {
+          navigate('/')
+        }
+  
+      }
     } catch (error) {
       console.log(error, '<-- error login');
     }
@@ -46,26 +62,23 @@ const Login = () => {
                     <p className="mb-0">Masukan Username dan Password untuk masuk</p>
                   </div>
                   <div className="flex-auto p-6">
-                    <label className="mb-2 ml-1 font-bold text-xs text-slate-700">Username</label>
-                    <div className="mb-4">
-                      <input type="text" className={classInput} name='username' onChange={handleInput} value={username} placeholder="Username" />
-                    </div>
-                    <label className="mb-2 ml-1 font-bold text-xs text-slate-700">Password</label>
-                    <div className="mb-4">
-                      <input type="password" className={classInput} name='password' onChange={handleInput} value={password} placeholder="Password" />
-                    </div>
-                    <div className="text-center">
-                      <button onClick={loginBtn} className='bg-blue-500 text-white py-2 w-full rounded-md transition-all hover:bg-blue-400'>Masuk</button>
-                      {/* <button type="button" className="inline-block w-full px-6 py-3 mt-6 mb-0 font-bold text-center text-white uppercase align-middle transition-all bg-blue-500 border-0 rounded-lg cursor-pointer shadow-soft-md bg-x-25 bg-150 leading-pro text-xs ease-soft-in tracking-tight-soft hover:shadow-soft-xs active:opacity-85">Masuk</button> */}
-                    </div>
+                    <BaseInput text='Username' className='mb-4' idError='usernameError' name='username' onChange={handleInput} value={username} placeholder='username' />
+                    <BaseInput text='Password' className='mb-4' idError='passwordError' name='password' onChange={handleInput} value={password} placeholder='Password' type='password' />
+                    <ButtonPrimary className='w-full' text='Masuk' onClick={loginBtn} />
                   </div>
-                 
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* alert */}
+      <ModalAlert
+        id='modalAlert'
+        text={textAlert}
+        idCloseBtn='closeBtnAlert'
+      />
     </>
   )
 }
