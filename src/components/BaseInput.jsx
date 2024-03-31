@@ -8,7 +8,7 @@ export const BaseInput = (props) => {
   return (
     <div className={props.className} id={props.idField}>
       <div>
-        {props.text ? <p className="pt-4 mb-2">{props.text}</p> : null}
+        {props.text ? <p className="pt-4 mb-2 text-sm font-bold">{props.text}</p> : null}
         <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} placeholder={props.placeholder} className={"w-full"+inputClass} autoComplete='off' />
       </div>
       <p className={'text-red-400 text-sm hidden '+props.classError} id={props.idError}>{props.errorText || 'Input tidak boleh kosong'}</p>
