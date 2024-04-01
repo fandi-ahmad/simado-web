@@ -10,6 +10,7 @@ import { ModalAlert, ModalForm } from '../../components/BaseModal'
 import { BaseInput } from '../../components/BaseInput'
 import { getId } from '../../function/baseFunction'
 import { ButtonPrimary } from '../../components/BaseButton'
+import { Footer } from '../../components/Footer'
 
 const ClassName = () => {
   const params = useParams()
@@ -150,6 +151,7 @@ const ClassName = () => {
           </div>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* modal for form input */}

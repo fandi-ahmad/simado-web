@@ -5,6 +5,7 @@ import { Main, Container, ContainerRow } from '../components/BaseLayout'
 import { CardData } from '../components/BaseCard'
 import { GetAllCount } from '../api/count'
 import { useGlobalState } from '../state/state'
+import { Footer } from '../components/Footer'
 
 
 const Dashboard = () => {
@@ -53,7 +54,7 @@ const Dashboard = () => {
           </ContainerRow>
 
         </Container>
-
+        <Footer/>
       </Main>
 
     </>

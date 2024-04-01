@@ -11,6 +11,7 @@ import { BaseButton, ButtonPrimary, ButtonDropdown } from '../../components/Base
 import { BaseDropdownUl, DropdownListData } from '../../components/Dropdown'
 import { GetAllEntryYear, CreateEntryYear, DeleteEntryYear, UpdateEntryYear} from '../../api/student/entryYear'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Footer } from '../../components/Footer'
 
 const Student = () => {
   const params = useParams()
@@ -69,7 +70,7 @@ const Student = () => {
     const { name, value } = e.target;
     switch (name) {
       case 'nisn': setNisn(value); break;
-      case 'studentName': setStudentName(value); break;
+      case 'studentName': if (/^[a-zA-Z\s]*$/.test(value)) setStudentName(value); break;
       case 'entryYear': if (/^[0-9]*$/.test(value) && value.length <= 4) setEntryYear(value); break;
       case 'search': setSearch(value); break;
       default: break;
@@ -388,6 +389,7 @@ const Student = () => {
           </ContainerRow>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* modal form for input entry year */}

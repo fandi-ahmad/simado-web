@@ -12,6 +12,7 @@ import { BadgeFormatFile } from '../components/Badge'
 import { GetAllCategory } from '../api/category'
 import { BaseDropdownUl, DropdownListData } from '../components/Dropdown'
 import { BaseButton, ButtonPrimary } from '../components/BaseButton'
+import { Footer } from '../components/Footer'
 
 
 const Document = () => {
@@ -324,6 +325,7 @@ const Document = () => {
           </ContainerRow>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* for detail data selected from table list */}

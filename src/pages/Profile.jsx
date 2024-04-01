@@ -8,6 +8,7 @@ import { useGlobalState } from '../state/state'
 import { ModalAlert } from '../components/BaseModal'
 import { getId } from '../function/baseFunction'
 import { UpdateUser } from '../api/user'
+import { Footer } from '../components/Footer'
 
 const Profile = () => {
   const [username, setUsername] = useState('')
@@ -129,6 +130,7 @@ const Profile = () => {
           </div>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* modal confirm for username */}

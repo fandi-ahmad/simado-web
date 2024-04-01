@@ -9,6 +9,7 @@ import { BaseInput, SelectInput } from '../components/BaseInput'
 import { formatDateAndTime, getId } from '../function/baseFunction'
 import { ButtonPrimary } from '../components/BaseButton'
 import { BaseDropdownUl, DropdownListData } from '../components/Dropdown'
+import { Footer } from '../components/Footer'
 
 const User = () => {
   const [data, setData] = useState([])
@@ -190,6 +191,7 @@ const User = () => {
           </ContainerRow>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* modal for form input */}

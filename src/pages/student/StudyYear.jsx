@@ -9,6 +9,7 @@ import { getId } from '../../function/baseFunction'
 import { ModalAlert, ModalForm } from '../../components/BaseModal'
 import { useNavigate } from 'react-router-dom'
 import { ButtonPrimary } from '../../components/BaseButton'
+import { Footer } from '../../components/Footer'
 
 const StudyYear = () => {
   const [data, setData] = useState([])
@@ -22,7 +23,6 @@ const StudyYear = () => {
   const getAllData = async () => {
     try {
       const result = await GetAllStudyYear()
-      console.log(result, '<-- result study year');
       if (result.data) setData(result.data)
     } catch (error) {}
   }
@@ -127,6 +127,7 @@ const StudyYear = () => {
           </div>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* modal for form input */}

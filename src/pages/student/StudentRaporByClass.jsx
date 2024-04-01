@@ -15,6 +15,7 @@ import { useGlobalState } from '../../state/state'
 import { BaseButton, ButtonPrimary } from '../../components/BaseButton'
 import { BaseDropdownUl, DropdownListData } from '../../components/Dropdown'
 import { GetAllEntryYear } from '../../api/student/entryYear'
+import { Footer } from '../../components/Footer'
 
 const StudentRaporByClass = () => {
   const params = useParams()
@@ -363,6 +364,7 @@ const StudentRaporByClass = () => {
           </ContainerRow>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* modal for form input */}
