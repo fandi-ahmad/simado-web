@@ -11,7 +11,7 @@ export const ListMenu = (props) => {
 
   return (
     <li className="mt-0.5 w-full cursor-pointer">
-      <a  onClick={() => navigate(props.to)} className={path === props.to ? aClassActive : aClass}>
+      <a  onClick={props.onClick ? props.onClick : () => navigate(props.to)} className={path === props.to ? aClassActive : aClass}>
         <div className={path === props.to ? divClassActive : divClass}>
           <i className={"fa-solid " + props.icon}></i>
         </div>
