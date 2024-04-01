@@ -4,9 +4,11 @@ import Navbar from '../components/Navbar'
 import { Main, Container, ContainerRow } from '../components/BaseLayout'
 import { CardData } from '../components/BaseCard'
 import { GetAllCount } from '../api/count'
+import { useGlobalState } from '../state/state'
 
 
 const Dashboard = () => {
+  const [userRoleLogin, setUserRoleLogin] = useGlobalState('userRoleLogin')
   const [data, setData] = useState()
 
   const getAllData = async () => {
@@ -33,7 +35,10 @@ const Dashboard = () => {
             {data ? <>
               <CardData text='Total File/kategori' value={data.file} icon='fa-file' />
               <CardData text='Siswa' value={data.student} icon='fa-graduation-cap' />
-              <CardData text='Pengguna' value={data.user} icon='fa-users' />
+              { userRoleLogin == 'operator' ?
+                <CardData text='Pengguna' value={data.user} icon='fa-users' />
+                : null
+              }
             </> : null}
           </ContainerRow>
 

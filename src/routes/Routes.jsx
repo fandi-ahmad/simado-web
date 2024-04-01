@@ -10,16 +10,30 @@ import Student from "../pages/student/Student";
 import StudentRaporByClass from "../pages/student/StudentRaporByClass";
 import { GetUserLogin } from "../api/auth";
 import { useEffect, useState } from "react";
+import { useGlobalState } from "../state/state";
 
 const Middleware = ({ element: Element, ...rest }) => {
   const navigate = useNavigate()
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [userIdLogin, setUserIdLogin] = useGlobalState('userIdLogin')
+  const [usernameLogin, setUsernameLogin] = useGlobalState('usernameLogin')
+  const [userRoleLogin, setUserRoleLogin] = useGlobalState('userRoleLogin')
   const path = location.pathname
 
   useEffect(() => {
     const getUserLogin = async () => {
       try {
         const result = await GetUserLogin()
+
+        if (result.data) {
+          setUserIdLogin(result.data.id)
+          setUsernameLogin(result.data.username)
+          setUserRoleLogin(result.data.role)
+        }
+
+        if (path == '/user' && result.data.role == 'staff') {
+          navigate('/')
+        }
 
         if (result.status === 200) {
           setIsUserLoggedIn(true);

@@ -12,6 +12,7 @@ import { ButtonPrimary } from './BaseButton'
 import { LogoutUser } from '../api/auth'
 
 const Sidebar = () => {
+  const [userRoleLogin, setUserRoleLogin] = useGlobalState('userRoleLogin')
   const [asideClass, setAsideClass] = useGlobalState('asideClass')
   const [dataCategory, setDataCategory] = useState([])
   const [categoryName, setCategoryName] = useState('')
@@ -137,9 +138,7 @@ const Sidebar = () => {
 
             <ListMenu icon='fa-house' text='Beranda' to='/' />
             <ListMenu icon='fa-file' text='Semua Dokumen' to='/document' />
-            <ListMenu icon='fa-users' text='Pengguna' to='/user' />
 
-           
             <SubListMenu text='Kategori' />
 
             <li className='w-full cursor-pointer px-4 text-sm'>
@@ -178,7 +177,11 @@ const Sidebar = () => {
 
 
             <SubListMenu text='Akun' />
-            <ListMenu icon='fa-user' text='Profile' to='/' />
+            { userRoleLogin == 'operator' ?
+              <ListMenu icon='fa-users' text='Pengguna' to='/user' />
+              : null
+            }
+            <ListMenu icon='fa-user' text='Profil' to='/' />
             <ListMenu icon='fa-right-from-bracket' text='Keluar' onClick={() => getId('modalAlertLogout').showModal()} />
 
 

@@ -151,6 +151,7 @@ const User = () => {
               thead={<>
                 <TableHead text='No' className='w-12' />
                 <TableHead text='Nama Pengguna' />
+                <TableHead text='role' />
                 <TableHead text='diperbarui pada' />
                 <TableHead />
                 <TableHead />
@@ -161,6 +162,7 @@ const User = () => {
                   <tr key={data.id}>
                     <TableData text={index+1} />
                     <TableData text={data.username} />
+                    <TableData text={data.role} />
                     <TableData text={formatDateAndTime(data.updatedAt)} />
                     <TableData className='w-full' />
                     <TableData text={
