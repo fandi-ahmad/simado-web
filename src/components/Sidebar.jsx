@@ -181,7 +181,7 @@ const Sidebar = () => {
               <ListMenu icon='fa-users' text='Pengguna' to='/user' />
               : null
             }
-            <ListMenu icon='fa-user' text='Profil' to='/' />
+            <ListMenu icon='fa-user' text='Profil' to='/profile' />
             <ListMenu icon='fa-right-from-bracket' text='Keluar' onClick={() => getId('modalAlertLogout').showModal()} />
 
 

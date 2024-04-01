@@ -1,30 +1,30 @@
-import { React, useEffect, useRef, useState } from 'react'
+import { React, useEffect, useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import { Container, ContainerRow, Main } from '../components/BaseLayout'
 import Navbar from '../components/Navbar'
 import { CreateUser, DeleteUser, GetAllUser, UpdateUser } from '../api/user'
 import { BaseTable, TableData, TableHead } from '../components/BaseTable'
 import { ModalAlert, ModalForm } from '../components/BaseModal'
-import { BaseInput } from '../components/BaseInput'
+import { BaseInput, SelectInput } from '../components/BaseInput'
 import { formatDateAndTime, getId } from '../function/baseFunction'
 import { ButtonPrimary } from '../components/BaseButton'
 import { BaseDropdownUl, DropdownListData } from '../components/Dropdown'
 
 const User = () => {
-  const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const [data, setData] = useState([])
   const [textInfo, setTextInfo] = useState('tambah')
   const [textAlert, setTextAlert] = useState('')
   const [passInfo, setPassInfo] = useState('')
   const [id, setId] = useState('')
   const [username, setUsername] = useState('')
+  const [role, setRole] = useState('staff')
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
 
   const getAllData = async () => {
     try {
       const result = await GetAllUser()
-      setData(result.data)
+      if (result.data) setData(result.data)
     } catch (error) {
       
     }
@@ -35,6 +35,8 @@ const User = () => {
     setUsername('')
     setPassword('')
     setNewPassword('')
+    setRole('staff')
+    getId('role').value = 'staff'
     getId('usernameError').classList.add('hidden')
     getId('passwordError').classList.add('hidden')
     getId('newPasswordError').classList.add('hidden')
@@ -44,6 +46,7 @@ const User = () => {
     const { name, value } = e.target;
     switch (name) {
       case 'username': setUsername(value); break;
+      case 'role': setRole(value); break;
       case 'password': setPassword(value); break;
       case 'newPassword': setNewPassword(value); break;
       default: break;
@@ -59,6 +62,8 @@ const User = () => {
       setPassInfo('lama')
       setUsername(dataParams.username)
       setId(dataParams.id)
+      setRole(dataParams.role)
+      getId('role').value = dataParams.role
 
       getId('username').classList.remove('hidden')
       getId('password').classList.add('hidden')
@@ -98,26 +103,32 @@ const User = () => {
         getId('closeBtn').click()
         await CreateUser({
           username: username,
-          password: password
+          password: password,
+          role: role
         })
-
       }
 
       if (id && username) {
-        getId('closeBtn').click()
-        await UpdateUser({
+        const result = await UpdateUser({
           id: id,
           username: username,
           password: password,
-          new_password: newPassword
+          new_password: newPassword,
+          role: role
         })
 
+        if (result.status == 200) {
+          getId('closeBtn').click()
+          setTextAlert('Password berhasil diperbarui!')
+          getId('modalAlert').showModal()
+        } else {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        }
       }
       
       setTimeout(() => { getAllData() }, 100)
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
 
   const deleteData = async () => {
@@ -143,7 +154,7 @@ const User = () => {
         <Container>
 
           <div className='flex justify-end mb-4'>
-            <button className={btnClass} onClick={() => openModal()}>tambah Pengguna <i className="fa-solid fa-plus"></i></button>
+            <ButtonPrimary text='tambah pengguna' icon='fa-plus' onClick={() => openModal()} />
           </div>
           
           <ContainerRow className='-mx-3'>
@@ -191,13 +202,18 @@ const User = () => {
             <BaseInput idError='usernameError' idField='username' text='nama pengguna' onChange={handleInput} value={username} name='username' />
             <BaseInput idError='passwordError' idField='password' text={'password ' + passInfo} onChange={handleInput} value={password} name='password' />
             <BaseInput idError='newPasswordError' idField='newPassword' text='password baru' onChange={handleInput} value={newPassword} name='newPassword' />
+            <SelectInput id='role' text='role' name='role' value={role} onChange={handleInput} isDefaultValue={true}
+              option={<>
+                <option value="staff">staff</option>
+                <option value="operator">operator</option>
+              </>}
+            />
+
           </div>
 
         </>}
 
-        addButton={<>
-          <ButtonPrimary text={textInfo} onClick={createOrUpdateData} />
-        </>}
+        addButton={<ButtonPrimary text={textInfo} onClick={createOrUpdateData} />}
       />
 
       {/* modal confirm */}
