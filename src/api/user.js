@@ -1,11 +1,11 @@
-import { callApi, callApiGet } from "./utils"
+import { callApi, callApiData } from "./utils"
 
 export const GetAllUser = () => {
-  return callApiGet('/user')
+  return callApi('get', '/user')
 }
 
 export const CreateUser = (data) => {
-  return callApi('post', '/user/create', data)
+  return callApiData('post', '/user/create', data)
 }
 
 export const DeleteUser = (uuid) => {
@@ -13,5 +13,5 @@ export const DeleteUser = (uuid) => {
 }
 
 export const UpdateUser = (data) => {
-  return callApi('put', '/user/update', data)
+  return callApiData('put', '/user/update', data)
 }

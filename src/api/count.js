@@ -1,9 +1,5 @@
-import { callApi, callApiGet } from "./utils"
+import { callApi } from "./utils"
 
 export const GetAllCount = () => {
-  return callApiGet('/count')
-}
-
-export const GetPostCount = () => {
-  return callApi('post', `/count/post`)
+  return callApi('get', '/count')
 }

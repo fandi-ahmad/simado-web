@@ -1,9 +1,13 @@
-import { callApi, callApiGet } from "./utils"
+import { callApi, callApiData } from "./utils"
 
 export const LoginUser = (data) => {
-  return callApi('post', '/auth/login', data)
+  return callApiData('post', '/auth/login', data)
 }
 
 export const GetUserLogin = () => {
-  return callApiGet('/auth/get-user')
+  return callApi('get', '/auth/get-user')
+}
+
+export const LogoutUser = () => {
+  return callApiData('post', '/auth/logout')
 }

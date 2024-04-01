@@ -1,11 +1,11 @@
-import { callApi, callApiGet } from "../utils"
+import { callApi, callApiData } from "../utils"
 
 export const GetAllStudyYear = (id = '') => {
-  return callApiGet(`/student/study/${id}`)
+  return callApi('get', `/student/study/${id}`)
 }
 
 export const CreateStudyYear = (data) => {
-  return callApi('post', '/student/study/create', data)
+  return callApiData('post', '/student/study/create', data)
 }
 
 export const DeleteStudyYear = (id) => {
@@ -13,5 +13,5 @@ export const DeleteStudyYear = (id) => {
 }
 
 export const UpdateStudyYear = (data) => {
-  return callApi('put', '/student/study/update', data)
+  return callApiData('put', '/student/study/update', data)
 }
