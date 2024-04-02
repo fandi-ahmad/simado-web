@@ -5,12 +5,13 @@ import Navbar from '../../components/Navbar'
 import { CreateStudent, DeleteStudent, GetAllStudent, UpdateStudent } from '../../api/student/student'
 import { BaseTable, TableData, TableHead } from '../../components/BaseTable'
 import { ModalAlert, ModalForm } from '../../components/BaseModal'
-import { getId } from '../../function/baseFunction'
+import { formatDateAndTime, getId } from '../../function/baseFunction'
 import { BaseInput, InputColumn } from '../../components/BaseInput'
 import { BaseButton, ButtonPrimary, ButtonDropdown } from '../../components/BaseButton'
 import { BaseDropdownUl, DropdownListData } from '../../components/Dropdown'
 import { GetAllEntryYear, CreateEntryYear, DeleteEntryYear, UpdateEntryYear} from '../../api/student/entryYear'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Footer } from '../../components/Footer'
 
 const Student = () => {
   const params = useParams()
@@ -24,6 +25,9 @@ const Student = () => {
   const [studentName, setStudentName] = useState('')
   const [year, setYear] = useState('')
   const [id, setId] = useState('')
+
+  const [fileUpload, setFileUpload] = useState('')
+  const [textFileInput, setTextFileInput] = useState('')
 
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
@@ -66,11 +70,16 @@ const Student = () => {
     const { name, value } = e.target;
     switch (name) {
       case 'nisn': setNisn(value); break;
-      case 'studentName': setStudentName(value); break;
-      case 'entryYear': setEntryYear(value); break;
+      case 'studentName': if (/^[a-zA-Z\s]*$/.test(value)) setStudentName(value); break;
+      case 'entryYear': if (/^[0-9]*$/.test(value) && value.length <= 4) setEntryYear(value); break;
       case 'search': setSearch(value); break;
       default: break;
     }
+  };
+
+  const handleInputFile = (e) => {
+    const fileSelect = e.target.files[0]
+    setFileUpload(fileSelect)
   };
 
   const cleanUpFormInput = () => {
@@ -80,6 +89,9 @@ const Student = () => {
     setYear('')
     setIdEntryYear('')
     setEntryYear('')
+    setFileUpload('')
+    setTextFileInput('')
+    getId('fileUpload').value = ''
     getId('nisnError').classList.add('hidden')
     getId('studentNameError').classList.add('hidden')
     getId('entryYearError').classList.add('hidden')
@@ -87,7 +99,7 @@ const Student = () => {
 
   const openModal = (dataParams = '') => {
     if (!dataEntryYear[0]) {
-      setTextAlert('Buat masuk terlebih dahulu!')
+      setTextAlert('Buat tahun masuk terlebih dahulu!')
       getId('modalAlert').showModal()
     } else {
       getId('modalForm').showModal()
@@ -101,6 +113,7 @@ const Student = () => {
         // for edit
         setTextBtnAction('simpan')
         setTextInfo('Edit data siswa')
+        setTextFileInput('Perbarui ijazah siswa')
   
         setId(dataParams.id)
         setNisn(dataParams.nisn)
@@ -109,6 +122,7 @@ const Student = () => {
         // for create new
         setTextBtnAction('buat')
         setTextInfo('Buat data siswa baru')
+        setTextFileInput('Upload ijazah siswa')
       }
     }
 
@@ -133,24 +147,22 @@ const Student = () => {
       if (nisn == '') getId('nisnError').classList.remove('hidden')
       if (studentName == '') getId('studentNameError').classList.remove('hidden')
 
+      const formData = new FormData();
+      formData.append('nisn', nisn)
+      formData.append('name', studentName)
+      formData.append('id_entry_year', idEntryYearFromParam)
+      formData.append('file_upload', fileUpload)
+
       // create
       if (!id && nisn && studentName) {
-        const result = await CreateStudent({
-          nisn: nisn,
-          name: studentName,
-          id_entry_year: idEntryYearFromParam
-        })
+        const result = await CreateStudent(formData)
         validateResult(result)
       }
 
       // update
       if (id && nisn && studentName) {
-        const result = await UpdateStudent({
-          id: id,
-          nisn: nisn,
-          name: studentName,
-          id_entry_year: idEntryYearFromParam
-        })
+        formData.append('id', id)
+        const result = await UpdateStudent(formData)
         validateResult(result)
       }
       
@@ -163,7 +175,13 @@ const Student = () => {
       getId('closeBtnConfirm').click()
 
       // delete student
-      if (id) await DeleteStudent(id)
+      if (id) {
+        const result = await DeleteStudent(id)
+        if (result.status !== 200) {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        }
+      }
 
       // delete entry year
       if (idEntryYear) {
@@ -220,23 +238,38 @@ const Student = () => {
   const createOrUpdateEntryYear = async () => {
     try {
       if (entryYear == '') getId('entryYearError').classList.remove('hidden')
-    
-      // create
-      if (!idEntryYear && entryYear) {
-        getId('closeBtnEntryYear').click()
-        await CreateEntryYear({
-          year: entryYear
-        })
-      }
 
-      // update
-      if (idEntryYear && entryYear) {
-        getId('closeBtnEntryYear').click()
-         await UpdateEntryYear({
-          id: idEntryYear,
-          year: entryYear
-        })
+      if (entryYear.length !== 4) {
+        setTextAlert('Jumlah karakter minimal 4')
+        getId('modalAlert').showModal()
+      } else {
+
+        const actionResult = (result) => {
+          if (result.status !== 200) {
+            setTextAlert(result.message)
+            getId('modalAlert').showModal()
+          } else {
+            getId('closeBtnEntryYear').click()
+          }
+        }
+
+        // create
+        if (!idEntryYear && entryYear) {
+          const result = await CreateEntryYear({  year: entryYear })
+          actionResult(result)
+        }
+  
+        // update
+        if (idEntryYear && entryYear) {
+          const result = await UpdateEntryYear({
+            id: idEntryYear,
+            year: entryYear
+          })
+          actionResult(result)
+        }
+
       }
+    
 
       setTimeout(() => { getAllDataEntryYear() }, 100)
     } catch (error) {}
@@ -313,6 +346,8 @@ const Student = () => {
                   <TableHead text='No' className='w-12' />
                   <TableHead text='NISN' />
                   <TableHead text='Nama Siswa' />
+                  <TableHead text='Diperbarui pada' />
+                  <TableHead text='file ijazah' />
                   <TableHead />
                   <TableHead />
                 </>}
@@ -323,6 +358,12 @@ const Student = () => {
                       <TableData text={index+1} />
                       <TableData text={data.nisn} />
                       <TableData text={data.name} className='capitalize' />
+                      <TableData text={formatDateAndTime(data.updatedAt)} className='pr-8' />
+                      <TableData text={data.ijazah_file
+                        ? <i className="fa-solid fa-file-circle-check text-lg text-green-400"></i> 
+                        : <i className="fa-solid fa-file-circle-xmark text-lg text-red-400"></i>} 
+                      />
+
                       <TableData className='w-full' />
                       <TableData text={
                         <BaseDropdownUl icon='fa-ellipsis-vertical'>
@@ -348,10 +389,11 @@ const Student = () => {
           </ContainerRow>
 
         </Container>
+        <Footer/>
       </Main>
 
-       {/* modal form for input */}
-       <ModalForm
+      {/* modal form for input entry year */}
+      <ModalForm
         id='modalFormEntryYear'
         fill={<>
           <h3 className="font-bold text-lg capitalize">{textInfo}</h3>
@@ -373,6 +415,7 @@ const Student = () => {
             <p>Tahun masuk siswa</p>
             <p className='w-96 font-semibold'>{year}</p>
           </div>
+          <InputColumn idError='fileUploadError' text={textFileInput} type='file' onChange={handleInputFile} name='file_upload' id='fileUpload' />
         </>}
 
         addButton={<ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />}

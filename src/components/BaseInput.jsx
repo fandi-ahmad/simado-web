@@ -8,7 +8,7 @@ export const BaseInput = (props) => {
   return (
     <div className={props.className} id={props.idField}>
       <div>
-        {props.text ? <p className="pt-4 mb-2">{props.text}</p> : null}
+        {props.text ? <p className="pt-4 mb-2 text-sm font-bold">{props.text}</p> : null}
         <input type={props.type || 'text'} name={props.name} id={props.id} value={props.value} onChange={props.onChange} placeholder={props.placeholder} className={"w-full"+inputClass} autoComplete='off' />
       </div>
       <p className={'text-red-400 text-sm hidden '+props.classError} id={props.idError}>{props.errorText || 'Input tidak boleh kosong'}</p>
@@ -36,11 +36,14 @@ export const InputColumn = (props) => {
 export const SelectInput = (props) => {
   return (
     <div className='mb-2'>
-      <p className="pt-4 mb-2">{props.text}</p>
+      <p className="pt-4 mb-2 text-sm font-bold">{props.text}</p>
       <select id={props.id} onChange={props.onChange} name={props.name} className={`${props.classInput || ''} ${inputClass} cursor-pointer w-full`}>
-        <option>-</option>
+        { props.isDefaultValue ? null :
+          <option>-</option>
+        }
         {props.option}
       </select>
+      <p className={'text-red-400 text-sm hidden '+props.classError} id={props.idError}>{props.errorText || 'Input tidak boleh kosong'}</p>
     </div>
   )
 }

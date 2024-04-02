@@ -9,6 +9,7 @@ import { getId } from '../../function/baseFunction'
 import { ModalAlert, ModalForm } from '../../components/BaseModal'
 import { useNavigate } from 'react-router-dom'
 import { ButtonPrimary } from '../../components/BaseButton'
+import { Footer } from '../../components/Footer'
 
 const StudyYear = () => {
   const [data, setData] = useState([])
@@ -16,19 +17,20 @@ const StudyYear = () => {
   const [id, setId] = useState('')
   const [textInfo, setTextInfo] = useState('')
   const [textBtnAction, setTextBtnAction] = useState('Buat')
+  const [textAlert, setTextAlert] = useState('')
   const navigate = useNavigate()
 
   const getAllData = async () => {
     try {
       const result = await GetAllStudyYear()
-      setData(result.data)
+      if (result.data) setData(result.data)
     } catch (error) {}
   }
 
   const handleInput = (e) => {
     const { name, value } = e.target;
     switch (name) {
-      case 'studyYear': setStudyYear(value); break;
+      case 'studyYear': if (/^[0-9/-]*$/.test(value) && value.length <= 9) setStudyYear(value); break;
       default: break;
     }
   };
@@ -52,26 +54,41 @@ const StudyYear = () => {
 
   const createOrUpdateData = async () => {
     try {
-      if (studyYear == '') {
-        getId('studyYearError').classList.remove('hidden')
-      } else {
-        getId('closeBtn').click()
-        
-        // create
-        if (!id) await CreateStudyYear({ study_year: studyYear })
+      if (studyYear == '') getId('studyYearError').classList.remove('hidden')
 
-        // update
-        if (id) await UpdateStudyYear({ study_year: studyYear, id: id })
-
-        setTimeout(() => { getAllData() }, 100)
+      const actionResult = (result) => {
+        if (result.status !== 200) {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        } else {
+          getId('closeBtn').click()
+        }
       }
+      
+      // create
+      if (!id && studyYear) {
+        const result = await CreateStudyYear({ study_year: studyYear })
+        actionResult(result)
+      }
+
+      // update
+      if (id && studyYear) {
+        const result = await UpdateStudyYear({ study_year: studyYear, id: id })
+        actionResult(result)
+      }
+
+      setTimeout(() => { getAllData() }, 100)
     } catch (error) {}
   }
 
   const deleteData = async () => {
     try {
       getId('closeBtnConfirm').click()
-      await DeleteStudyYear(id)
+      const result = await DeleteStudyYear(id)
+      if (result.status !== 200) {
+        setTextAlert(result.message)
+        getId('modalAlert').showModal()
+      }
       getAllData()
     } catch (error) {
       setTextAlert('Terjadi kesalahan!')
@@ -101,7 +118,7 @@ const StudyYear = () => {
 
           <div className='grid grid-cols-4'>
             {data.map((data) => (
-              <CardFolder key={data.id} text={data.study_year}
+              <CardFolder key={data.id} text={data.study_year} count={data.count}
                 onClick={() => navigate(`/rapor/study-year/${data.id}/class`)}
                 onClickEdit={() => openModal(data)}
                 onClickDelete={() => openModalConfirm(data.id)}
@@ -110,6 +127,7 @@ const StudyYear = () => {
           </div>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* modal for form input */}
@@ -134,6 +152,13 @@ const StudyYear = () => {
         idCloseBtn='closeBtnConfirm'
         closeText='Batal'
         addButton={<ButtonPrimary text='ya, hapus' onClick={deleteData} />}
+      />
+
+      {/* alert */}
+      <ModalAlert
+        id='modalAlert'
+        text={textAlert}
+        idCloseBtn='closeBtnAlert'
       />
 
 

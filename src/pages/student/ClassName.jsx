@@ -10,6 +10,7 @@ import { ModalAlert, ModalForm } from '../../components/BaseModal'
 import { BaseInput } from '../../components/BaseInput'
 import { getId } from '../../function/baseFunction'
 import { ButtonPrimary } from '../../components/BaseButton'
+import { Footer } from '../../components/Footer'
 
 const ClassName = () => {
   const params = useParams()
@@ -21,6 +22,7 @@ const ClassName = () => {
   const [className, setClassName] = useState('')
   const [textInfo, setTextInfo] = useState('')
   const [textBtnAction, setTextBtnAction] = useState('buat')
+  const [textAlert, setTextAlert] = useState('')
 
   const getStudyYearById = async () => {
     try {
@@ -31,7 +33,7 @@ const ClassName = () => {
 
   const getAllData = async () => {
     try {
-      const result = await GetAllClass()
+      const result = await GetAllClass('', idStudyYear)
       setData(result.data)
     } catch (error) {}
   }
@@ -76,21 +78,31 @@ const ClassName = () => {
   const createOrUpdateData = async () => {
     try {
       if (className == '') getId('classNameError').classList.remove('hidden')
+
+      const actionResult = (result) => {
+        if (result.status !== 200) {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        } else {
+          getId('closeBtn').click()
+        }
+      }
       
       // create
       if (!id && className) {
-        await CreateClass({ class_name: className })
+        const result = await CreateClass({ class_name: className })
+        actionResult(result)
       }
 
       // update
       if (id && className) {
-        await UpdateClass({
+        const result = await UpdateClass({
           id: id,
           class_name: className
         })
+        actionResult(result)
       }
-      
-      getId('closeBtn').click()
+
       setTimeout(() => { getAllData() }, 100)
     } catch (error) {}
   }
@@ -98,7 +110,11 @@ const ClassName = () => {
   const deleteData = async () => {
     try {
       getId('closeBtnConfirm').click()
-      await DeleteClass(id)
+      const result = await DeleteClass(id)
+      if (result.status !== 200) {
+        setTextAlert(result.message)
+        getId('modalAlert').showModal()
+      }
       getAllData()
     } catch (error) {
       setTextAlert('Terjadi kesalahan!')
@@ -126,7 +142,7 @@ const ClassName = () => {
 
           <div className='grid grid-cols-4'>
             {data.map((data) => (
-              <CardFolder key={data.id} text={data.class_name}
+              <CardFolder key={data.id} text={data.class_name} count={data.count}
                 onClick={() => navigate(data.id)}
                 onClickEdit={() => openModal(data)}
                 onClickDelete={() => openModalConfirm(data.id)}
@@ -135,6 +151,7 @@ const ClassName = () => {
           </div>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* modal for form input */}
@@ -160,6 +177,14 @@ const ClassName = () => {
         closeText='Batal'
         addButton={<ButtonPrimary text='ya, hapus' onClick={deleteData} />}
       />
+
+      {/* alert */}
+      <ModalAlert
+        id='modalAlert'
+        text={textAlert}
+        idCloseBtn='closeBtnAlert'
+      />
+
     </>
   )
 }

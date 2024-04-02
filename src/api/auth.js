@@ -1,11 +1,13 @@
-import { callApi } from "./utils"
+import { callApi, callApiData } from "./utils"
 
 export const LoginUser = (data) => {
-  return callApi('post', '/auth/login', data)
+  return callApiData('post', '/auth/login', data)
 }
 
-// export const LoginUser = (data) => {
-//   return axios.post(`${apiUrl}/login`, data)
-//   .then(response => response.data)
-//   .catch(error => error.response)
-// }
+export const GetUserLogin = () => {
+  return callApi('get', '/auth/get-user')
+}
+
+export const LogoutUser = () => {
+  return callApiData('post', '/auth/logout')
+}

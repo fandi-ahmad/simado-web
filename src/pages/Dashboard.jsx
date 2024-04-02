@@ -1,10 +1,30 @@
-import React from 'react'
+import { React, useEffect, useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import { Main, Container, ContainerRow } from '../components/BaseLayout'
 import { CardData } from '../components/BaseCard'
+import { GetAllCount } from '../api/count'
+import { useGlobalState } from '../state/state'
+import { Footer } from '../components/Footer'
+
 
 const Dashboard = () => {
+  const [userRoleLogin, setUserRoleLogin] = useGlobalState('userRoleLogin')
+  const [data, setData] = useState()
+
+  const getAllData = async () => {
+    try {
+      const result = await GetAllCount()
+      if (result.data) setData(result.data);
+    } catch (error) {
+      
+    }
+  }
+
+  useEffect(() => {
+    getAllData()
+  }, [])
+
   return (
     <>
       <Sidebar/>
@@ -13,18 +33,28 @@ const Dashboard = () => {
         <Container>
 
           <ContainerRow className='-mx-3'>
-
-            <CardData text='Total File' value='237' icon='fa-file' />
-            <CardData text='Users' value='14' icon='fa-users' />
-            <CardData text='Database' value='7,108 kb' icon='fa-database' />
-            <CardData text='Download' value='82' icon='fa-download' />
-
-
+            {data ? <>
+              <CardData text='Total File/kategori' value={data.file} icon='fa-file' />
+              <CardData text='Siswa' value={data.student} icon='fa-graduation-cap' />
+              { userRoleLogin == 'operator' ?
+                <CardData text='Pengguna' value={data.user} icon='fa-users' />
+                : null
+              }
+            </> : null}
           </ContainerRow>
 
+          <div className='mt-6 mb-3'>
+            <div className='font-semibold'>Kategori:</div>
+          </div>
+
+          <ContainerRow className='-mx-3'>
+            { data ? data.file_category.map((item, index) => (
+              <CardData key={index} text={item.category_name} value={item.total} />
+            )) : null}
+          </ContainerRow>
 
         </Container>
-
+        <Footer/>
       </Main>
 
     </>

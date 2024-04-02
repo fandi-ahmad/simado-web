@@ -1,5 +1,5 @@
 import { React, useEffect, useState } from 'react'
-import logoCt from '../assets/img/logo-ct.png'
+import logoSma from '../assets/img/logo-sman1-banawa-tengah.png'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useGlobalState } from '../state/state'
 import { CreateCategory, DeleteCategory, GetAllCategory, UpdateCategory } from '../api/category'
@@ -9,8 +9,10 @@ import { BaseInput } from './BaseInput'
 import { ListMenu, ListMenuChild, SubListMenu } from './sidebarPart'
 import { DropdownListData } from './Dropdown'
 import { ButtonPrimary } from './BaseButton'
+import { LogoutUser } from '../api/auth'
 
 const Sidebar = () => {
+  const [userRoleLogin, setUserRoleLogin] = useGlobalState('userRoleLogin')
   const [asideClass, setAsideClass] = useGlobalState('asideClass')
   const [dataCategory, setDataCategory] = useState([])
   const [categoryName, setCategoryName] = useState('')
@@ -25,7 +27,8 @@ const Sidebar = () => {
   const getAllData = async () => {
     try {
       const { data } = await GetAllCategory()
-      setDataCategory(data)
+      if (data) setDataCategory(data)
+      
     } catch (error) {}
   }
 
@@ -106,6 +109,13 @@ const Sidebar = () => {
     } catch (error) {}
   }
 
+  const logout = async () => {
+    try {
+      const result = await LogoutUser()
+      if (result.status == 200) navigate('/login')
+    } catch (error) {}
+  }
+
   useEffect(() => {
     getAllData()
   }, [])
@@ -115,9 +125,9 @@ const Sidebar = () => {
       <aside className={'sidebar max-w-62.5 ease-nav-brand z-10 fixed inset-y-0 my-4 ml-4 block w-full -translate-x-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 p-0 antialiased transition-transform duration-200 xl:left-0 xl:translate-x-0 ps bg-white xl:bg-white ' + asideClass}>
         <div className="h-19.5">
           <i onClick={() => setAsideClass(asideClass === 'shadow-soft-xl' ? 'translate-x-0' : 'shadow-soft-xl')} className="absolute top-0 right-0 p-4 opacity-50 cursor-pointer fas fa-times text-slate-400 xl:hidden" ></i>
-          <a className="block px-8 py-6 m-0 text-sm whitespace-nowrap text-slate-700">
-            <img src={logoCt} className="inline h-full max-w-full transition-all duration-200 ease-nav-brand max-h-8" alt="main_logo" />
-            <span className="ml-1 font-semibold transition-all duration-200 ease-nav-brand">SIMADO</span>
+          <a className="flex items-center px-8 py-6 m-0 text-sm whitespace-nowrap text-slate-700">
+            <img src={logoSma} className="inline w-8 h-full max-w-full transition-all duration-200 ease-nav-brand max-h-8" alt="main_logo" />
+            <span className="ml-2 font-semibold transition-all duration-200 ease-nav-brand">SIMADO</span>
           </a>
         </div>
 
@@ -128,9 +138,7 @@ const Sidebar = () => {
 
             <ListMenu icon='fa-house' text='Beranda' to='/' />
             <ListMenu icon='fa-file' text='Semua Dokumen' to='/document' />
-            <ListMenu icon='fa-users' text='Pengguna' to='/user' />
 
-           
             <SubListMenu text='Kategori' />
 
             <li className='w-full cursor-pointer px-4 text-sm'>
@@ -166,12 +174,15 @@ const Sidebar = () => {
             <SubListMenu text='Data Siswa' className='mt-8' />
             <ListMenuChild text='Data siswa' to='/data/student' />
             <ListMenuChild text='Rapor' to='/rapor/study-year' />
-            <ListMenuChild text='Ijazah' />
 
 
             <SubListMenu text='Akun' />
-            <ListMenu icon='fa-user' text='Profile' to='/' />
-            <ListMenu icon='fa-right-from-bracket' text='Keluar' to='/' />
+            { userRoleLogin == 'operator' ?
+              <ListMenu icon='fa-users' text='Pengguna' to='/user' />
+              : null
+            }
+            <ListMenu icon='fa-user' text='Profil' to='/profile' />
+            <ListMenu icon='fa-right-from-bracket' text='Keluar' onClick={() => getId('modalAlertLogout').showModal()} />
 
 
           </ul>
@@ -205,6 +216,14 @@ const Sidebar = () => {
         id='modalAlertCategory'
         text={textAlert}
         idCloseBtn='closeBtnAlertCategory'
+      />
+
+      {/* alert logout */}
+      <ModalAlert
+        id='modalAlertLogout'
+        text='Yakin ingin keluar?'
+        idCloseBtn='closeBtnAlertLogout'
+        addButton={<ButtonPrimary text='ya, keluar' onClick={logout} />}
       />
     </>
   )

@@ -2,6 +2,7 @@ import React from 'react'
 import { useGlobalState } from '../state/state'
 
 const Navbar = (props) => {
+  const [usernameLogin, setUsernameLogin] = useGlobalState('usernameLogin')
   const [asideClass, setAsideClass] = useGlobalState('asideClass')
 
   return (
@@ -30,8 +31,12 @@ const Navbar = (props) => {
                 </div>
               </a>
             </li>
-
           </ul>
+        </div>
+
+        <div className='w-full text-end text-sm'>
+          <i className="fa-solid fa-user"></i>
+          <span className='ml-2'>{usernameLogin}</span>
         </div>
       </div>
     </nav>

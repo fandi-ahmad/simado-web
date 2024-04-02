@@ -12,6 +12,7 @@ import { BadgeFormatFile } from '../components/Badge'
 import { GetAllCategory } from '../api/category'
 import { BaseDropdownUl, DropdownListData } from '../components/Dropdown'
 import { BaseButton, ButtonPrimary } from '../components/BaseButton'
+import { Footer } from '../components/Footer'
 
 
 const Document = () => {
@@ -30,9 +31,7 @@ const Document = () => {
   const [format, setFormat] = useState('')
   const [idCategory, setIdCategory] = useState('')
   const [categoryName, setCategoryName] = useState('')
-  const meta = useRef({
-    id_user: '81ba78db-8c01-4ce4-ad1d-d656320fada9' //temporary
-  })
+  
   const params = useParams()
   const navigate = useNavigate()
   const [createdAt, setCreatedAt] = useState('')
@@ -158,7 +157,6 @@ const Document = () => {
       if (!id && fileUpload == '') getId('fileUploadError').classList.remove('hidden')
       
       const formData = new FormData();
-      formData.append('id_user', meta.current.id_user)
       formData.append('id_category', idCategory)
       formData.append('file_name', fileName)
       formData.append('number', number)
@@ -166,19 +164,28 @@ const Document = () => {
       formData.append('format', format)
       formData.append('file_upload', fileUpload)
 
-      // create
-      if (!id && fileName && fileUpload) {
-        getId('closeBtn').click()
-        await CreateFile(formData)
+      if (!idCategory || idCategory == '-') {
+        // cek kondisi saat pindahkan kategori
+        setTextAlert('Pilih kategori terlebih dahulu!')
+        getId('modalAlert').showModal()
+      } else {
+
+        // create
+        if (!id && fileName && fileUpload) {
+          getId('closeBtn').click()
+          await CreateFile(formData)
+        }
+  
+        // update
+        if (id && fileName) {
+          formData.append('id', id)
+          getId('closeBtn').click()
+          getId('closeBtnChangeCategory').click()
+          await UpdateFile(formData)
+        }
+
       }
 
-      // update
-      if (id && fileName) {
-        formData.append('id', id)
-        getId('closeBtn').click()
-        getId('closeBtnChangeCategory').click()
-        await UpdateFile(formData)
-      }
       
       setTimeout(() => { getAllData() }, 100)
     } catch (error) {
@@ -318,6 +325,7 @@ const Document = () => {
           </ContainerRow>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* for detail data selected from table list */}
@@ -345,9 +353,9 @@ const Document = () => {
         fill={<>
           <h3 className="font-semibold text-lg capitalize">Pindahkan "{fileName}"</h3>
           <SelectInput text={<>Lokasi saat ini: <span className='font-semibold'>{categoryName}</span></>} id='category' name='category' onChange={handleInput} option={
-            dataCategory.map((data) => (
+            dataCategory ? dataCategory.map((data) => (
               <option key={data.id} value={data.id}>{data.name}</option>
-            ))
+            )) : null
           } />
         </>}
 

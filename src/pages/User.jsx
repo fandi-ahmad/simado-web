@@ -1,92 +1,145 @@
-import { React, useEffect, useRef, useState } from 'react'
+import { React, useEffect, useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import { Container, ContainerRow, Main } from '../components/BaseLayout'
 import Navbar from '../components/Navbar'
-import { CreateUser, GetAllUser, UpdateUser } from '../api/user'
+import { CreateUser, DeleteUser, GetAllUser, UpdateUser } from '../api/user'
 import { BaseTable, TableData, TableHead } from '../components/BaseTable'
 import { ModalAlert, ModalForm } from '../components/BaseModal'
-import { BaseInput } from '../components/BaseInput'
-import { getId } from '../function/baseFunction'
+import { BaseInput, SelectInput } from '../components/BaseInput'
+import { formatDateAndTime, getId } from '../function/baseFunction'
+import { ButtonPrimary } from '../components/BaseButton'
+import { BaseDropdownUl, DropdownListData } from '../components/Dropdown'
+import { Footer } from '../components/Footer'
 
 const User = () => {
-  const btnClass = 'btn text-white capitalize bg-gradient-to-tl from-purple-700 to-pink-500 border-0 hover:opacity-85'
   const [data, setData] = useState([])
   const [textInfo, setTextInfo] = useState('tambah')
   const [textAlert, setTextAlert] = useState('')
   const [passInfo, setPassInfo] = useState('')
-  const [uuid, setUuid] = useState('')
-  const meta = useRef({
-    username: '',
-    password: '',
-    new_password: ''
-  })
+  const [id, setId] = useState('')
+  const [username, setUsername] = useState('')
+  const [role, setRole] = useState('staff')
+  const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
 
   const getAllData = async () => {
     try {
       const result = await GetAllUser()
-      setData(result.data)
+      if (result.data) setData(result.data)
     } catch (error) {
       
     }
   }
 
-  const openModal = (dataParams = '') => {
-    setUuid(dataParams.uuid)
+  const cleanUpFormInput = () => {
+    setId('')
+    setUsername('')
+    setPassword('')
+    setNewPassword('')
+    setRole('staff')
+    getId('role').value = 'staff'
+    getId('usernameError').classList.add('hidden')
+    getId('passwordError').classList.add('hidden')
+    getId('newPasswordError').classList.add('hidden')
+  }
 
-    meta.current.username = dataParams.username
-    getId('username').value = dataParams.username
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case 'username': setUsername(value); break;
+      case 'role': setRole(value); break;
+      case 'password': setPassword(value); break;
+      case 'newPassword': setNewPassword(value); break;
+      default: break;
+    }
+  };
 
-    if (dataParams.uuid) {
+  const openModal = (dataParams = '', isPassword = false) => {
+    cleanUpFormInput()
+
+    if (dataParams.id) {
+      // for edit
       setTextInfo('perbarui')
       setPassInfo('lama')
-      getId('new_password').classList.remove('hidden')
-      getId('btnCreate').classList.add('hidden')
-      getId('btnUpdate').classList.remove('hidden')
+      setUsername(dataParams.username)
+      setId(dataParams.id)
+      setRole(dataParams.role)
+      getId('role').value = dataParams.role
+
+      getId('username').classList.remove('hidden')
+      getId('password').classList.add('hidden')
+      getId('newPassword').classList.add('hidden')
+
+      if (isPassword) {
+        getId('username').classList.add('hidden')
+        getId('password').classList.remove('hidden')
+        getId('newPassword').classList.remove('hidden')
+      }
+
     } else {
+      // for create
       setTextInfo('tambah')
       setPassInfo('')
-      getId('new_password').classList.add('hidden')
-      getId('btnCreate').classList.remove('hidden')
-      getId('btnUpdate').classList.add('hidden')
+      getId('username').classList.remove('hidden')
+      getId('password').classList.remove('hidden')
+      getId('newPassword').classList.add('hidden')
     }
 
     getId('modalForm').showModal()
   }
 
-  const openModalConfirm = (uuid) => {
-    setUuid(uuid)
+  const openModalConfirm = (idselected) => {
+    setId(idselected)
     getId('modalConfirm').showModal()
   }
 
-  const handleChange = (fieldName, event) => {
-    meta.current[fieldName] = event.target.value;
-  };
-
-  const createData = async () => {
+  const createOrUpdateData = async () => {
     try {
-      getId('closeBtn').click()
-      await CreateUser({
-        username: meta.current.username,
-        password: meta.current.password
-      })
-      getAllData()
-    } catch (error) {
+      if (username == '') getId('usernameError').classList.remove('hidden')
+      if (password == '') getId('passwordError').classList.remove('hidden')
+      if (newPassword == '') getId('newPasswordError').classList.remove('hidden')
+
+
+      if (!id && username && password) {
+        getId('closeBtn').click()
+        await CreateUser({
+          username: username,
+          password: password,
+          role: role
+        })
+      }
+
+      if (id && username) {
+        const result = await UpdateUser({
+          id: id,
+          username: username,
+          password: password,
+          new_password: newPassword,
+          role: role
+        })
+
+        if (result.status == 200) {
+          getId('closeBtn').click()
+          setTextAlert('Password berhasil diperbarui!')
+          getId('modalAlert').showModal()
+        } else {
+          setTextAlert(result.message)
+          getId('modalAlert').showModal()
+        }
+      }
       
-    }
+      setTimeout(() => { getAllData() }, 100)
+    } catch (error) {}
   }
 
-  const updateData = async () => {
+  const deleteData = async () => {
     try {
-      getId('closeBtn').click()
-      await UpdateUser({
-        uuid: uuid,
-        username: meta.current.username,
-        password: meta.current.password,
-        new_password: meta.current.new_password
-      })
+      getId('closeBtnConfirm').click()
+      await DeleteUser(id)
       getAllData()
     } catch (error) {
-      console.log(error, '<-- error update');
+      setTextAlert('Terjadi kesalahan!')
+      getId('modalAlert').showModal()
     }
   }
 
@@ -102,7 +155,7 @@ const User = () => {
         <Container>
 
           <div className='flex justify-end mb-4'>
-            <button className={btnClass} onClick={() => openModal()}>tambah Pengguna <i className="fa-solid fa-plus"></i></button>
+            <ButtonPrimary text='tambah pengguna' icon='fa-plus' onClick={() => openModal()} />
           </div>
           
           <ContainerRow className='-mx-3'>
@@ -110,29 +163,35 @@ const User = () => {
               thead={<>
                 <TableHead text='No' className='w-12' />
                 <TableHead text='Nama Pengguna' />
-                <TableHead text='dibuat pada' />
+                <TableHead text='role' />
+                <TableHead text='diperbarui pada' />
+                <TableHead />
                 <TableHead />
               </>}
 
               tbody={<>
-                {data.map((data, index) => (
-                  <tr key={data.uuid}>
+                {data ? data.map((data, index) => (
+                  <tr key={data.id}>
                     <TableData text={index+1} />
                     <TableData text={data.username} />
-                    <TableData text={data.createdAt} />
+                    <TableData text={data.role} />
+                    <TableData text={formatDateAndTime(data.updatedAt)} />
+                    <TableData className='w-full' />
                     <TableData text={
-                      <>
-                        <button className={'btn btn-sm btn-primary ms-4'} onClick={() => openModal(data)}>Edit</button>
-                        {/* <button className={'btn btn-sm btn-error text-white ms-4'} onClick={() => openModalConfirm(data.uuid)} >Hapus</button> */}
-                      </>
+                      <BaseDropdownUl icon='fa-ellipsis-vertical'>
+                        <DropdownListData icon='fa-pen-to-square' text='Edit username' onClick={() => openModal(data)} />
+                        <DropdownListData icon='fa-unlock-keyhole' text='Perbarui password' onClick={() => openModal(data, true)} />
+                        <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
+                      </BaseDropdownUl>
                     } className='w-48' />
                   </tr>
-                ))}
+                )) : null}
               </>}
             />
           </ContainerRow>
 
         </Container>
+        <Footer/>
       </Main>
 
       {/* modal for form input */}
@@ -141,18 +200,22 @@ const User = () => {
         fill={<>
           <h3 className="font-bold text-lg capitalize">{textInfo} pengguna</h3>
 
-          <div className=''>
-            <BaseInput text='nama pengguna' id='username' onChange={(event) => handleChange('username', event)} />
-            <BaseInput text={'password '+passInfo} id='password' onChange={(event) => handleChange('password', event)} />
-            <BaseInput text='password baru' idField='new_password' onChange={(event) => handleChange('new_password', event)} />
+          <div>
+            <BaseInput idError='usernameError' idField='username' text='nama pengguna' onChange={handleInput} value={username} name='username' />
+            <BaseInput idError='passwordError' idField='password' text={'password ' + passInfo} onChange={handleInput} value={password} name='password' />
+            <BaseInput idError='newPasswordError' idField='newPassword' text='password baru' onChange={handleInput} value={newPassword} name='newPassword' />
+            <SelectInput id='role' text='role' name='role' value={role} onChange={handleInput} isDefaultValue={true}
+              option={<>
+                <option value="staff">staff</option>
+                <option value="operator">operator</option>
+              </>}
+            />
+
           </div>
 
         </>}
 
-        addButton={<>
-          <button className={"btn hidden "+btnClass} id='btnCreate' onClick={createData}>Tambah</button>
-          <button className={"btn hidden "+btnClass} id='btnUpdate' onClick={updateData}>Perbarui</button>
-        </>}
+        addButton={<ButtonPrimary text={textInfo} onClick={createOrUpdateData} />}
       />
 
       {/* modal confirm */}
@@ -161,7 +224,7 @@ const User = () => {
         text='Yakin ingin menghapusnya??'
         idCloseBtn='closeBtnConfirm'
         closeText='Batal'
-        addButton={<button className={"btn "+btnClass} >Ya, Hapus</button>}
+        addButton={<ButtonPrimary text='ya, hapus' onClick={deleteData} />}
       />
 
       {/* alert */}

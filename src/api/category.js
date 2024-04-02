@@ -1,11 +1,11 @@
-import { callApi } from "./utils"
+import { callApi, callApiData } from "./utils"
 
 export const GetAllCategory = () => {
   return callApi('get', '/category')
 }
 
 export const CreateCategory = (data) => {
-  return callApi('post', '/category/create', data)
+  return callApiData('post', '/category/create', data)
 }
 
 export const DeleteCategory = (uuid) => {
@@ -13,5 +13,5 @@ export const DeleteCategory = (uuid) => {
 }
 
 export const UpdateCategory = (data) => {
-  return callApi('put', '/category/update', data)
+  return callApiData('put', '/category/update', data)
 }

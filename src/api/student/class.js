@@ -1,11 +1,11 @@
-import { callApi } from "../utils"
+import { callApi, callApiData } from "../utils"
 
-export const GetAllClass = (id = '') => {
-  return callApi('get', `/student/class/${id}`)
+export const GetAllClass = (id = '', id_study_year = '') => {
+  return callApi('get', `/student/class/${id}?id_study_year=${id_study_year}`)
 }
 
 export const CreateClass = (data) => {
-  return callApi('post', '/student/class/create', data)
+  return callApiData('post', '/student/class/create', data)
 }
 
 export const DeleteClass = (id) => {
@@ -13,5 +13,5 @@ export const DeleteClass = (id) => {
 }
 
 export const UpdateClass = (data) => {
-  return callApi('put', '/student/class/update', data)
+  return callApiData('put', '/student/class/update', data)
 }
