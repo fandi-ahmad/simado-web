@@ -41,7 +41,7 @@ const StudentRaporByClass = () => {
   const [studentName, setStudentName] = useState('')
 
   const [elementFound, setElementFound] = useState(false)
-  const [searchTerm, setSearchTerm] = useGlobalState('searchTerm')
+  const [searchTerm, setSearchTerm] = useGlobalState('searchTerm') // search student name in modal
 
   const [search, setSearch] = useState('')
 
@@ -49,7 +49,6 @@ const StudentRaporByClass = () => {
   const [limit, setLimit] = useState(10)
   const [orderName, setOrderName] = useState('updatedAt')
   const [orderValue, setOrderValue] = useState('DESC')
-  const [searchStudent, setSearchStudent] = useState('')
   const [idEntryYear, setIdEntryYear] = useState('')
 
   const [dataEntryYear, setDataEntryYear] = useState([])
@@ -91,7 +90,7 @@ const StudentRaporByClass = () => {
 
   const getAllDataStudent = async () => {
     try {
-      const result = await GetAllStudent(page, limit, 'name', 'ASC', searchStudent, idEntryYear)
+      const result = await GetAllStudent(page, limit, 'name', 'ASC', searchTerm, idEntryYear)
       if (result.data) setDataStudent(result.data)
     } catch (error) {}
   }
@@ -261,7 +260,6 @@ const StudentRaporByClass = () => {
                   <BaseDropdownUl icon='fa-ellipsis-vertical'>
                     <DropdownListData icon='fa-download' text='Download' onClick={() => downloadFile(import.meta.env.VITE_API_URL+'/'+data.file)} />
                     <DropdownListData icon='fa-eye' text='Lihat' onClick={() => window.open(import.meta.env.VITE_API_URL+'/'+data.file, '_blank')} />
-                    <DropdownListData icon='fa-circle-info' text='Detail' />
                     <DropdownListData icon='fa-pen-to-square' text='Edit' onClick={() => openModal(data)} />
                     <DropdownListData icon='fa-trash-can' text='Hapus' onClick={() => openModalConfirm(data.id)} />
                   </BaseDropdownUl>
@@ -294,7 +292,7 @@ const StudentRaporByClass = () => {
 
   useEffect(() => {
     getAllDataStudent()
-  }, [idEntryYear])
+  }, [idEntryYear, searchTerm])
 
   useEffect(() => {
     getId('studentList').click()

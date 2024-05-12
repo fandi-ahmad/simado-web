@@ -140,7 +140,7 @@ const ClassName = () => {
             <ButtonPrimary text='buat nama kelas baru' icon='fa-plus' onClick={() => openModal()} className='mr-2' />
           </div>
 
-          <div className='grid grid-cols-4'>
+          <div className='grid grid-cols-4 pb-10'>
             {data.map((data) => (
               <CardFolder key={data.id} text={data.class_name} count={data.count}
                 onClick={() => navigate(data.id)}

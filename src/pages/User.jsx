@@ -21,6 +21,7 @@ const User = () => {
   const [role, setRole] = useState('staff')
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
+  const [isUpdatePassword, setIsUpdatePassword] = useState(false)
 
   const getAllData = async () => {
     try {
@@ -56,6 +57,7 @@ const User = () => {
 
   const openModal = (dataParams = '', isPassword = false) => {
     cleanUpFormInput()
+    setIsUpdatePassword(false)
 
     if (dataParams.id) {
       // for edit
@@ -71,6 +73,7 @@ const User = () => {
       getId('newPassword').classList.add('hidden')
 
       if (isPassword) {
+        setIsUpdatePassword(true)
         getId('username').classList.add('hidden')
         getId('password').classList.remove('hidden')
         getId('newPassword').classList.remove('hidden')
@@ -99,7 +102,7 @@ const User = () => {
       if (password == '') getId('passwordError').classList.remove('hidden')
       if (newPassword == '') getId('newPasswordError').classList.remove('hidden')
 
-
+      // create user
       if (!id && username && password) {
         getId('closeBtn').click()
         await CreateUser({
@@ -109,22 +112,46 @@ const User = () => {
         })
       }
 
+      // update user
       if (id && username) {
-        const result = await UpdateUser({
-          id: id,
-          username: username,
-          password: password,
-          new_password: newPassword,
-          role: role
-        })
 
-        if (result.status == 200) {
-          getId('closeBtn').click()
-          setTextAlert('Password berhasil diperbarui!')
-          getId('modalAlert').showModal()
-        } else {
-          setTextAlert(result.message)
-          getId('modalAlert').showModal()
+        const runResultUpdate = (result) => {
+          if (result.status == 200) {
+            getId('closeBtn').click()
+            if (password && newPassword) {
+              setTextAlert('Password berhasil diperbarui!')
+            } else {
+              setTextAlert('Username berhasil diperbarui!')
+            }
+            getId('modalAlert').showModal()
+          } else {
+            setTextAlert(result.message)
+            getId('modalAlert').showModal()
+          }
+        }
+
+        // update user username
+        if (!isUpdatePassword && !password && !newPassword) {
+          const result = await UpdateUser({
+            id: id,
+            username: username,
+            password: password,
+            new_password: newPassword,
+            role: role
+          })
+          runResultUpdate(result)
+        }
+
+        // update user password
+        if (isUpdatePassword && password && newPassword) {
+          const result = await UpdateUser({
+            id: id,
+            username: username,
+            password: password,
+            new_password: newPassword,
+            role: role
+          })
+          runResultUpdate(result)
         }
       }
       
