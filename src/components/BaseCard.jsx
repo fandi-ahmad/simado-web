@@ -3,7 +3,7 @@ import React from 'react'
 export const CardData = (props) => {
   return (
     <div className="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-      <div className="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-xl bg-clip-border">
+      <div className="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-xl bg-clip-border mb-6">
         <div className="flex-auto p-4">
           <div className="flex flex-row -mx-3">
             <div className={`${props.icon ? 'w-2/3' : ''} flex-none max-w-full px-3`}>
