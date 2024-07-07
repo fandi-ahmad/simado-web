@@ -26,6 +26,7 @@ const Document = () => {
   const [isRequired, setIsRequired] = useState(false)
   const [fileUpload, setFileUpload] = useState('')
   const [fileName, setFileName] = useState('')
+  const [entryFile, setEntryFile] = useState('')
   const [number, setNumber] = useState('')
   const [source, setSource] = useState('')
   const [format, setFormat] = useState('')
@@ -61,6 +62,8 @@ const Document = () => {
         setCategoryName(result.category);
 
         setTotalPage(result.total_page)
+
+        console.log(result, '<-- result all data');
       }
 
       if (result.status == 404) navigate('/document')
@@ -72,6 +75,7 @@ const Document = () => {
     setId('')
     setFileUpload('')
     setFileName('')
+    setEntryFile('')
     setNumber('')
     setSource('')
     setFormat('')
@@ -85,6 +89,7 @@ const Document = () => {
     switch (name) {
       case 'file_name': setFileName(value); break;
       case 'source': setSource(value); break;
+      case 'entry_file': setEntryFile(value); break;
       case 'number': setNumber(value); break;
       case 'category': setIdCategory(value); break;
       case 'search': setSearch(value); break;
@@ -124,6 +129,7 @@ const Document = () => {
       setTextFileInput('upload file baru')
       setIsRequired(false)
       setTextBtnAction('Simpan')
+      getId('entry_file').classList.add('hidden')
 
       selectedDataFile(dataParams)
     } else {
@@ -132,6 +138,7 @@ const Document = () => {
       setTextFileInput('upload file')
       setIsRequired(true)
       setTextBtnAction('Buat')
+      getId('entry_file').classList.remove('hidden')
     }
 
     getId('modalForm').showModal()
@@ -154,6 +161,7 @@ const Document = () => {
   const createOrUpdateData = async () => {
     try {
       if (fileName == '') getId('fileNameError').classList.remove('hidden')
+      if (entryFile == '') getId('entryFileError').classList.remove('hidden')
       if (!id && fileUpload == '') getId('fileUploadError').classList.remove('hidden')
 
       // check if value space only
@@ -162,6 +170,7 @@ const Document = () => {
       const formData = new FormData();
       formData.append('id_category', idCategory)
       formData.append('file_name', fileName)
+      formData.append('entry_file', entryFile)
       formData.append('number', number)
       formData.append('source', source)
       formData.append('format', format)
@@ -174,7 +183,7 @@ const Document = () => {
       } else {
 
         // create
-        if (!id && fileName && fileUpload && fileName.trim() !== "") {
+        if (!id && fileName && fileUpload && fileName.trim() !== "" && entryFile) {
           getId('closeBtn').click()
           await CreateFile(formData)
         }
@@ -285,6 +294,7 @@ const Document = () => {
                 <TableHead text='No' className='w-12' />
                 <TableHead text='Perihal' />
                 <TableHead />
+                <TableHead text='Masuk pada' />
                 <TableHead text='Sumber/dari' />
                 <TableHead text='Diperbarui pada' />
                 <TableHead />
@@ -298,6 +308,7 @@ const Document = () => {
                     <TableData text={index+1} />
                     <TableData text={limitText(data.file_name)} />
                     <TableData text={<BadgeFormatFile text={data.format} />} pl='pl-2' />
+                    <TableData text={data.entry_file} />
                     <TableData text={data.source ? limitText(data.source, 20) : '-'} />
                     <TableData text={formatDateAndTime(data.updatedAt)} />
                     <TableData text='' className='w-full' />
@@ -378,6 +389,7 @@ const Document = () => {
           <div>
             <InputColumn idError='fileUploadError' text={textFileInput} type='file' onChange={handleInputFile} name='file_upload' id='fileUpload' required={isRequired} />
             <InputColumn idError='fileNameError' className='mt-6' text='perihal' id='file_name' onChange={handleInput} name='file_name' value={fileName} required />
+            <InputColumn idError='entryFileError' className='mt-6' text='surat masuk' type='date' idField='entry_file' onChange={handleInput} name='entry_file' value={entryFile} required />
             <InputColumn text='nomor surat' id='number' onChange={handleInput} name='number' value={number} />
             <InputColumn text='sumber/dari' id='source' onChange={handleInput} name='source' value={source} />
           </div>
