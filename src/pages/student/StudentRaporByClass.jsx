@@ -344,7 +344,7 @@ const StudentRaporByClass = () => {
         <Container>
 
           <div className='flex justify-end mb-4'>
-            <ButtonPrimary text='buat rapor siswa' icon='fa-plus' onClick={() => openModal()} />
+            <ButtonPrimary text='upload rapor siswa' icon='fa-plus' onClick={() => openModal()} />
           </div>
 
           <ContainerRow className='-mx-3 relative'>
@@ -397,7 +397,7 @@ const StudentRaporByClass = () => {
 
         </>}
 
-        addButton={<ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />}
+        addButton={<ButtonPrimary text='Simpan' onClick={createOrUpdateData} />}
       />
 
       {/* modal confirm */}

@@ -155,7 +155,10 @@ const Document = () => {
     try {
       if (fileName == '') getId('fileNameError').classList.remove('hidden')
       if (!id && fileUpload == '') getId('fileUploadError').classList.remove('hidden')
-      
+
+      // check if value space only
+      if (fileName.trim() === "") getId('fileNameError').classList.remove('hidden')
+
       const formData = new FormData();
       formData.append('id_category', idCategory)
       formData.append('file_name', fileName)
@@ -171,13 +174,13 @@ const Document = () => {
       } else {
 
         // create
-        if (!id && fileName && fileUpload) {
+        if (!id && fileName && fileUpload && fileName.trim() !== "") {
           getId('closeBtn').click()
           await CreateFile(formData)
         }
   
         // update
-        if (id && fileName) {
+        if (id && fileName && fileName.trim() !== "") {
           formData.append('id', id)
           getId('closeBtn').click()
           getId('closeBtnChangeCategory').click()
@@ -250,7 +253,7 @@ const Document = () => {
 
           {params.id ?
             <div className='flex justify-end mb-4'>
-              <ButtonPrimary text='Buat file baru' icon='fa-plus' onClick={() => openModal()} />
+              <ButtonPrimary text='Upload file baru' icon='fa-plus' onClick={() => openModal()} />
             </div> : null
           }
           
@@ -280,7 +283,7 @@ const Document = () => {
               thead={ !data[0] ? <TableHead text='-- Belum ada data --' className='text-center' /> :
               <>
                 <TableHead text='No' className='w-12' />
-                <TableHead text='Nama File' />
+                <TableHead text='Perihal' />
                 <TableHead />
                 <TableHead text='Sumber/dari' />
                 <TableHead text='Diperbarui pada' />
@@ -334,7 +337,7 @@ const Document = () => {
         fill={<>
           <table>
             <tbody>
-              <ListDataForDetail label='Nama file' value={fileName} />
+              <ListDataForDetail label='Perihal' value={fileName} />
               <ListDataForDetail label='Nomor' value={number ? number : '-'} />
               <ListDataForDetail label='Sumber' value={source ? source : '-'} />
               <ListDataForDetail label='Diperbarui pada' value={formatDateAndTime(updatedAt)} />
@@ -374,7 +377,7 @@ const Document = () => {
 
           <div>
             <InputColumn idError='fileUploadError' text={textFileInput} type='file' onChange={handleInputFile} name='file_upload' id='fileUpload' required={isRequired} />
-            <InputColumn idError='fileNameError' className='mt-6' text='nama file' id='file_name' onChange={handleInput} name='file_name' value={fileName} required />
+            <InputColumn idError='fileNameError' className='mt-6' text='perihal' id='file_name' onChange={handleInput} name='file_name' value={fileName} required />
             <InputColumn text='nomor surat' id='number' onChange={handleInput} name='number' value={number} />
             <InputColumn text='sumber/dari' id='source' onChange={handleInput} name='source' value={source} />
           </div>
@@ -382,7 +385,7 @@ const Document = () => {
         </>}
 
         addButton={<>
-          <ButtonPrimary text={textBtnAction} onClick={createOrUpdateData} />
+          <ButtonPrimary text='Simpan' onClick={createOrUpdateData} />
         </>}
       />
 

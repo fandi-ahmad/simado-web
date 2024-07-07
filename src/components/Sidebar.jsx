@@ -57,7 +57,7 @@ const Sidebar = () => {
   };
 
   const validateInput =  () => {
-    if (categoryName == '') {
+    if (categoryName == '' || (categoryName.trim() === "")) {
       getId('errorMsg').classList.remove('hidden')
       return false
     } else {

@@ -147,6 +147,9 @@ const Student = () => {
       if (nisn == '') getId('nisnError').classList.remove('hidden')
       if (studentName == '') getId('studentNameError').classList.remove('hidden')
 
+      if (nisn.trim() === "") getId('nisnError').classList.remove('hidden')
+      if (studentName.trim() === "") getId('studentNameError').classList.remove('hidden')
+
       const formData = new FormData();
       formData.append('nisn', nisn)
       formData.append('name', studentName)
@@ -154,13 +157,13 @@ const Student = () => {
       formData.append('file_upload', fileUpload)
 
       // create
-      if (!id && nisn && studentName) {
+      if (!id && nisn && studentName && nisn.trim() !== "" && studentName.trim() !== "") {
         const result = await CreateStudent(formData)
         validateResult(result)
       }
 
       // update
-      if (id && nisn && studentName) {
+      if (id && nisn && studentName && nisn.trim() !== "" && studentName.trim() !== "") {
         formData.append('id', id)
         const result = await UpdateStudent(formData)
         validateResult(result)

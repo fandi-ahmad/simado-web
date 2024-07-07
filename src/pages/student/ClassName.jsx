@@ -78,6 +78,7 @@ const ClassName = () => {
   const createOrUpdateData = async () => {
     try {
       if (className == '') getId('classNameError').classList.remove('hidden')
+      if (className.trim() === "") getId('classNameError').classList.remove('hidden')
 
       const actionResult = (result) => {
         if (result.status !== 200) {
@@ -89,13 +90,13 @@ const ClassName = () => {
       }
       
       // create
-      if (!id && className) {
+      if (!id && className && className.trim() !== "") {
         const result = await CreateClass({ class_name: className })
         actionResult(result)
       }
 
       // update
-      if (id && className) {
+      if (id && className && className.trim() !== "") {
         const result = await UpdateClass({
           id: id,
           class_name: className
